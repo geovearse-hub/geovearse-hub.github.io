@@ -11,6 +11,9 @@
 <script src="https://unpkg.com/shpjs@3.6.3/dist/shp.js"></script>
 <script src="https://unpkg.com/georaster@1.6.0/dist/georaster.browserify.min.js"></script>
 <script src="https://unpkg.com/georaster-layer-for-leaflet@3.10.0/dist/georaster-layer-for-leaflet.min.js"></script>
+<script src="https://unpkg.com/@turf/turf@7.2.0/turf.min.js"></script>
+<script src="https://unpkg.com/tokml@0.4.0/tokml.js"></script>
+<script src="https://unpkg.com/@mapbox/shp-write@0.4.3/shpwrite.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <style>
@@ -203,7 +206,7 @@ nav.hnav button:hover,nav.hnav button.act{background:var(--g5);color:var(--g1)}
 .msv{font-family:var(--mono);font-weight:800;color:var(--g1);font-size:11px}
 
 /* Basemap grid */
-.bmg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.bmg{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:7px}
 .bmc{border:2px solid var(--border);border-radius:11px;overflow:hidden;cursor:pointer;background:var(--panel);transition:all .18s}
 .bmc.act{border-color:var(--g1);box-shadow:0 0 0 3px rgba(54,179,106,.15)}
 .bmc:hover{border-color:var(--border2)}
@@ -253,6 +256,12 @@ nav.hnav button:hover,nav.hnav button.act{background:var(--g5);color:var(--g1)}
 .attr-table td{padding:6px 8px;border:1px solid var(--border);font-family:var(--mono);white-space:nowrap;cursor:pointer;color:var(--text)}
 .attr-table tr:hover td{background:var(--g5);color:var(--g1)}
 .attr-table tr.highlighted td{background:rgba(57,255,20,.15)!important;color:var(--g1)!important;font-weight:800}
+
+
+.attr-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.attr-actions .da{width:28px;height:28px}
+.attr-table td.editable{position:relative}
+.attr-table td.editable:hover{outline:1px dashed var(--border2);outline-offset:-2px}
 
 /* ── DASHBOARD (floating) ── */
 #dashboard-panel{
@@ -462,7 +471,8 @@ body.overlay-shift #attr-search-bar{top:132px}
     <button class="act"><i class="fa-solid fa-map"></i> الخريطة</button>
     <button onclick="openM('m-add')"><i class="fa-solid fa-plus"></i> إضافة</button>
     <button onclick="openM('m-feat')"><i class="fa-solid fa-location-dot"></i> معلم</button>
-    <button onclick="exportGJ()"><i class="fa-solid fa-file-export"></i> تصدير</button>
+    <button onclick="openBufferModal()"><i class="fa-solid fa-circle-nodes"></i> Buffer</button>
+    <button onclick="openExportModal()"><i class="fa-solid fa-file-export"></i> تصدير</button>
     <button onclick="saveProject()"><i class="fa-solid fa-floppy-disk"></i> حفظ مشروع</button>
     <button onclick="document.getElementById('proj-load-fi').click()"><i class="fa-solid fa-folder-open"></i> فتح مشروع</button>
     <input type="file" id="proj-load-fi" accept=".gvp,.json" style="display:none" onchange="loadProject(this.files[0]);this.value=''">
@@ -524,9 +534,13 @@ body.overlay-shift #attr-search-bar{top:132px}
         <div class="sttl">خريطة الخلفية</div>
         <div class="bmg">
           <div class="bmc act" onclick="setBM('osm',this)"><div class="bmt" style="background:linear-gradient(135deg,#edf9ef,#d4f2dc)">🗺️</div><div class="bml">OpenStreetMap</div></div>
+          <div class="bmc" onclick="setBM('googleRoad',this)"><div class="bmt" style="background:linear-gradient(135deg,#eef3ff,#d9e4ff)">📍</div><div class="bml">Google Road</div></div>
+          <div class="bmc" onclick="setBM('googleSat',this)"><div class="bmt" style="background:linear-gradient(135deg,#12213b,#22324c)">🛰️</div><div class="bml">Google Satellite</div></div>
+          <div class="bmc" onclick="setBM('googleHybrid',this)"><div class="bmt" style="background:linear-gradient(135deg,#1b2740,#405c7d)">🌐</div><div class="bml">Google Hybrid</div></div>
           <div class="bmc" onclick="setBM('imagery',this)"><div class="bmt" style="background:linear-gradient(135deg,#12213b,#22324c)">🛰️</div><div class="bml">Esri Imagery</div></div>
           <div class="bmc" onclick="setBM('topo',this)"><div class="bmt" style="background:linear-gradient(135deg,#fff8e0,#f4dcb2)">🏔️</div><div class="bml">World Topo</div></div>
           <div class="bmc" onclick="setBM('streets',this)"><div class="bmt" style="background:linear-gradient(135deg,#f9f9f9,#dedede)">🏙️</div><div class="bml">World Streets</div></div>
+          <div class="bmc" onclick="setBM('cartoLight',this)"><div class="bmt" style="background:linear-gradient(135deg,#fafafa,#ececec)">🧭</div><div class="bml">Carto Light</div></div>
           <div class="bmc" onclick="setBM('dark',this)"><div class="bmt" style="background:linear-gradient(135deg,#252525,#454545)">🌙</div><div class="bml">Dark Canvas</div></div>
           <div class="bmc" onclick="setBM('natgeo',this)"><div class="bmt" style="background:linear-gradient(135deg,#eff7de,#cfe2a6)">🌿</div><div class="bml">National Geo</div></div>
         </div>
@@ -655,15 +669,20 @@ body.overlay-shift #attr-search-bar{top:132px}
       <div id="attr-panel" class="float-panel">
         <div class="attr-hdr" id="attr-drag-handle">
           <span id="attr-title"><i class="fa-solid fa-table"></i> جدول البيانات</span>
-          <div style="display:flex;align-items:center;gap:7px">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
             <select id="attr-layer-sel" onchange="switchAttrLayer(this.value)" style="padding:4px 7px;border:1px solid var(--border);border-radius:7px;background:var(--panel2);font-family:var(--font);font-size:11px;color:var(--text)">
               <option value="">اختر طبقة</option>
             </select>
-            <div class="srch" style="max-width:200px;height:30px">
+            <div class="srch" style="max-width:190px;height:30px">
               <i class="fa-solid fa-filter"></i>
               <input id="attr-search" type="text" placeholder="فلترة..." oninput="filterAttrTable(this.value)">
             </div>
-            <button class="da" onclick="toggleAttrTable()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="attr-actions">
+              <button class="da" title="إضافة حقل" onclick="addAttributeField()"><i class="fa-solid fa-square-plus"></i></button>
+              <button class="da" title="تغيير اسم حقل" onclick="renameAttributeField()"><i class="fa-solid fa-i-cursor"></i></button>
+              <button class="da" title="إضافة سجل" onclick="addAttributeRecord()"><i class="fa-solid fa-table-list"></i></button>
+              <button class="da" onclick="toggleAttrTable()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
           </div>
         </div>
         <div class="attr-body">
@@ -848,6 +867,39 @@ body.overlay-shift #attr-search-bar{top:132px}
     </div>
   </div>
 </div>
+
+<div class="ov" id="m-export">
+  <div class="modal" style="width:460px">
+    <div class="mh"><h2 style="font-size:14px"><i class="fa-solid fa-file-export"></i> تصدير الطبقة</h2><button class="mcl" onclick="closeM('m-export')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="mb">
+      <div class="fr"><label>الطبقة</label><select id="export-layer-sel"></select></div>
+      <div class="fr"><label>الصيغة</label><select id="export-format"><option value="geojson">GeoJSON</option><option value="csv">CSV</option><option value="kml">KML</option><option value="shp">SHP ZIP</option></select></div>
+      <div class="small" style="padding:8px;background:var(--panel2);border:1px solid var(--border);border-radius:8px">يمكن تصدير الطبقات المتجهة فقط. الراستر غير مدعوم في التصدير الحالي.</div>
+    </div>
+    <div class="mft">
+      <button class="btn bg" onclick="closeM('m-export')">إلغاء</button>
+      <button class="btn bp" onclick="runExport()">تصدير</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="m-buffer">
+  <div class="modal" style="width:480px">
+    <div class="mh"><h2 style="font-size:14px"><i class="fa-solid fa-circle-nodes"></i> Buffer بسيط</h2><button class="mcl" onclick="closeM('m-buffer')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="mb">
+      <div class="fr"><label>الطبقة</label><select id="buffer-layer-sel"></select></div>
+      <div class="fg">
+        <div class="fr"><label>المسافة</label><input id="buffer-distance" type="number" min="0" step="0.1" value="1"></div>
+        <div class="fr"><label>الوحدة</label><select id="buffer-unit"><option value="kilometers">كيلومتر</option><option value="meters">متر</option></select></div>
+      </div>
+      <div class="fr"><label>اسم الطبقة الناتجة</label><input id="buffer-name" type="text" placeholder="مثال: Buffer Layer"></div>
+    </div>
+    <div class="mft">
+      <button class="btn bg" onclick="closeM('m-buffer')">إلغاء</button>
+      <button class="btn bp" onclick="runBuffer()">تنفيذ</button>
+    </div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>
@@ -888,6 +940,10 @@ const TILES={
   streets: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}),
   dark:    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16}),
   natgeo:  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:16}),
+  googleRoad: L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}),
+  googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}),
+  googleHybrid: L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}),
+  cartoLight: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:'© CARTO'}),
 };
 const map=L.map('m2d',{zoomControl:false,center:[27,34],zoom:7});
 TILES.osm.addTo(map);
@@ -1205,22 +1261,19 @@ function updateStats(){
 function renderAttrTable(lyr, highlightIdx=-1){
   const thead=document.getElementById('attr-thead');
   const tbody=document.getElementById('attr-tbody');
-  if(!lyr||!lyr.features.length){ thead.innerHTML='<tr><th>لا توجد بيانات</th></tr>'; tbody.innerHTML=''; return; }
-  document.getElementById('attr-title').innerHTML=`<i class="fa-solid fa-table"></i> ${lyr.name}`;
+  if(!lyr){ thead.innerHTML='<tr><th>لا توجد طبقة</th></tr>'; tbody.innerHTML=''; return; }
   const rows=filterFeaturesForTable(lyr.features, attrFilter);
   const keys=[...new Set(rows.flatMap(f=>Object.keys(f.properties||{})))];
-  thead.innerHTML=`<tr>${keys.map(k=>`<th>${k}</th>`).join('')}<th>#</th></tr>`;
-  tbody.innerHTML=rows.map((f,i)=>{
+  document.getElementById('attr-title').innerHTML=`<i class="fa-solid fa-table"></i> ${lyr.name}`;
+  thead.innerHTML='<tr><th>#</th>'+keys.map(k=>`<th title="${k}">${k}</th>`).join('')+'</tr>';
+  tbody.innerHTML=rows.map((f,rowIdx)=>{
     const origIdx=lyr.features.indexOf(f);
     const hl=origIdx===highlightIdx?' highlighted':'';
-    return `<tr class="${hl}" onclick="zoomToFeature('${lyr.id}',${origIdx})" title="انقر للتحديد">${keys.map(k=>`<td>${(f.properties||{})[k]??''}</td>`).join('')}<td>${origIdx+1}</td></tr>`;
+    return `<tr class="${hl}" onclick="zoomToFeature('${lyr.id}',${origIdx})"><td>${origIdx+1}</td>${keys.map(k=>`<td class="editable" ondblclick="event.stopPropagation();editAttributeCell('${lyr.id}',${origIdx},'${k.replace(/'/g,"\'")}')">${(f.properties||{})[k]??''}</td>`).join('')}</tr>`;
   }).join('');
-  if(highlightIdx>=0){
-    setTimeout(()=>{ const hl=tbody.querySelector('.highlighted'); if(hl) hl.scrollIntoView({block:'center'}); },100);
-  }
-  /* Sync layer select */
   const sel=document.getElementById('attr-layer-sel');
-  if(sel) sel.value=lyr.id;
+  sel.value=lyr.id;
+  if(highlightIdx>-1){ setTimeout(()=>{ const hl=tbody.querySelector('.highlighted'); if(hl) hl.scrollIntoView({block:'center'}); },100); }
 }
 
 function zoomToFeature(lyrId, idx){
@@ -1776,14 +1829,108 @@ function addFeat(){
 }
 
 function setPickMode(){ closeM('m-feat'); pickMode=true; map.getContainer().style.cursor='crosshair'; showT('🎯 انقر على الخريطة لتحديد الموقع'); }
-function exportGJ(){
-  if(!layers.length) return showT('⚠️ لا توجد طبقات');
-  const l=layers.find(x=>x.id===activeId)||layers[0];
-  const fc={type:'FeatureCollection',features:l.features};
-  const a=document.createElement('a');
-  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(fc,null,2));
-  a.download=l.name+'.geojson'; a.click();
-  showT('✓ تم التصدير: '+l.name+'.geojson');
+function getVectorLayerById(id){ return layers.find(x=>x.id===id); }
+function featureCollectionFromLayer(lyr){ return {type:'FeatureCollection',features:(lyr?.features||[]).map(f=>JSON.parse(JSON.stringify(f)))}; }
+function downloadBlob(blob, filename){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1200); }
+function openExportModal(){ populateExportTargets(); openM('m-export'); }
+function populateExportTargets(){
+  const sel=document.getElementById('export-layer-sel'); if(!sel) return;
+  sel.innerHTML=layers.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+  if(activeId && layers.some(l=>l.id===activeId)) sel.value=activeId;
+  const bsel=document.getElementById('buffer-layer-sel'); if(bsel){
+    bsel.innerHTML=layers.filter(l=>l.features.length).map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+    if(activeId && layers.some(l=>l.id===activeId && l.features.length)) bsel.value=activeId;
+  }
+}
+function escapeXml(v){ return String(v??'').replace(/[<>&"']/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;','\"':'&quot;',"'":'&apos;'}[m])); }
+function fcToCsv(fc){
+  const keys=[...new Set((fc.features||[]).flatMap(f=>Object.keys(f.properties||{})))];
+  const geomType=fc.features.map(f=>f.geometry?.type||'');
+  const rows=[['id','geometry_type','lon','lat',...keys]];
+  (fc.features||[]).forEach((f,idx)=>{
+    let lon='',lat='';
+    if(f.geometry?.type==='Point'){ lon=f.geometry.coordinates[0]; lat=f.geometry.coordinates[1]; }
+    rows.push([idx+1, geomType[idx], lon, lat, ...keys.map(k=>f.properties?.[k]??'')]);
+  });
+  return rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+}
+async function runExport(){
+  const sel=document.getElementById('export-layer-sel'); const format=document.getElementById('export-format').value;
+  const lyr=getVectorLayerById(sel.value);
+  if(!lyr) return showT('⚠️ اختر طبقة متجهة أولًا');
+  const fc=featureCollectionFromLayer(lyr);
+  const base=(lyr.name||'layer').replace(/[\/:*?"<>|]+/g,'_');
+  try{
+    if(format==='geojson'){ downloadBlob(new Blob([JSON.stringify(fc,null,2)],{type:'application/geo+json'}), base+'.geojson'); }
+    else if(format==='csv'){ downloadBlob(new Blob([fcToCsv(fc)],{type:'text/csv;charset=utf-8'}), base+'.csv'); }
+    else if(format==='kml'){
+      if(typeof tokml!=='function') throw new Error('مكتبة KML غير متاحة');
+      const kml=tokml(fc,{name:'الاسم',description:'الوصف'});
+      downloadBlob(new Blob([kml],{type:'application/vnd.google-earth.kml+xml'}), base+'.kml');
+    }
+    else if(format==='shp'){
+      if(!window.shpwrite) throw new Error('مكتبة SHP غير متاحة');
+      const zipArrayBuffer=window.shpwrite.zip(fc,{folder:base,filename:base,types:{point:base+'_points',polygon:base+'_polygons',line:base+'_lines'}});
+      downloadBlob(new Blob([zipArrayBuffer],{type:'application/zip'}), base+'.zip');
+    }
+    closeM('m-export'); showT('✓ تم التصدير بنجاح');
+  }catch(e){ console.error(e); showT('⚠️ فشل التصدير: '+e.message); }
+}
+function exportGJ(){ openExportModal(); }
+function openBufferModal(){ populateExportTargets(); openM('m-buffer'); }
+function normalizeBufferUnit(unit){ return unit==='meters' ? 'meters' : 'kilometers'; }
+function runBuffer(){
+  const lyr=getVectorLayerById(document.getElementById('buffer-layer-sel').value);
+  const dist=parseFloat(document.getElementById('buffer-distance').value||'0');
+  const unit=normalizeBufferUnit(document.getElementById('buffer-unit').value);
+  const outName=document.getElementById('buffer-name').value.trim() || ((lyr?.name||'Layer')+' Buffer');
+  if(!lyr) return showT('⚠️ اختر طبقة');
+  if(!(dist>0)) return showT('⚠️ أدخل مسافة صحيحة');
+  if(typeof turf==='undefined') return showT('⚠️ مكتبة التحليل غير متاحة');
+  try{
+    const fc=featureCollectionFromLayer(lyr);
+    const buffered=turf.buffer(fc, dist, {units:unit});
+    addLayerFromGeoJSON(buffered, outName, '#7c3aed', 65);
+    closeM('m-buffer');
+    showT('✓ تم إنشاء طبقة Buffer');
+  }catch(e){ console.error(e); showT('⚠️ تعذر تنفيذ البفر: '+e.message); }
+}
+function getCurrentAttrLayer(){ return layers.find(l=>l.id===document.getElementById('attr-layer-sel')?.value) || layers.find(l=>l.id===activeId) || layers[0]; }
+function addAttributeField(){
+  const lyr=getCurrentAttrLayer(); if(!lyr) return showT('⚠️ اختر طبقة أولًا');
+  const field=prompt('اسم الحقل الجديد'); if(!field) return;
+  lyr.features.forEach(f=>{ f.properties=f.properties||{}; if(!(field in f.properties)) f.properties[field]=''; });
+  updateAllUI(); renderAttrTable(lyr); showT('✓ تمت إضافة الحقل');
+}
+function renameAttributeField(){
+  const lyr=getCurrentAttrLayer(); if(!lyr) return showT('⚠️ اختر طبقة أولًا');
+  const keys=[...new Set(lyr.features.flatMap(f=>Object.keys(f.properties||{})))]; if(!keys.length) return showT('⚠️ لا توجد حقول');
+  const oldName=prompt('اسم الحقل الحالي', keys[0]); if(!oldName) return;
+  if(!keys.includes(oldName)) return showT('⚠️ الحقل غير موجود');
+  const newName=prompt('الاسم الجديد للحقل', oldName); if(!newName || newName===oldName) return;
+  lyr.features.forEach(f=>{ f.properties=f.properties||{}; f.properties[newName]=f.properties[oldName]; delete f.properties[oldName]; });
+  updateAllUI(); renderAttrTable(lyr); showT('✓ تم تغيير اسم الحقل');
+}
+function addAttributeRecord(){
+  const lyr=getCurrentAttrLayer(); if(!lyr) return showT('⚠️ اختر طبقة أولًا');
+  const geomType=getGeometryType(lyr.features)||lyr.geomType||'Point';
+  const keys=[...new Set(lyr.features.flatMap(f=>Object.keys(f.properties||{})))];
+  let geom;
+  if(geomType.includes('Point')){ const center=map.getCenter(); geom={type:'Point',coordinates:[center.lng,center.lat]}; }
+  else if(geomType.includes('Line')){ const c=map.getCenter(); geom={type:'LineString',coordinates:[[c.lng,c.lat],[c.lng+0.02,c.lat+0.01]]}; }
+  else { const c=map.getCenter(); geom={type:'Polygon',coordinates:[[[c.lng,c.lat],[c.lng+0.02,c.lat],[c.lng+0.02,c.lat+0.02],[c.lng,c.lat+0.02],[c.lng,c.lat]]]} ; }
+  const props=Object.fromEntries(keys.map(k=>[k,'']));
+  lyr.features.push({type:'Feature',geometry:geom,properties:props});
+  refreshLayerOnMap(lyr); updateAllUI(); renderAttrTable(lyr, lyr.features.length-1); showT('✓ تمت إضافة سجل جديد');
+}
+function editAttributeCell(lyrId, featureIndex, key){
+  const lyr=getVectorLayerById(lyrId); if(!lyr) return;
+  const feat=lyr.features[featureIndex]; if(!feat) return;
+  const current=feat.properties?.[key]??'';
+  const next=prompt(`تعديل قيمة الحقل: ${key}`, current);
+  if(next===null) return;
+  feat.properties=feat.properties||{}; feat.properties[key]=next;
+  refreshLayerOnMap(lyr); updateAllUI(); renderAttrTable(lyr, featureIndex);
 }
 function doSearch(q){
   const term=q.trim().toLowerCase();
@@ -2241,6 +2388,10 @@ async function doAddLayer(){
   }
 }
 
+
+// Export and analysis modal selects sync
+const _origUpdateAllUI=updateAllUI;
+updateAllUI=function(){ _origUpdateAllUI(); populateExportTargets(); };
 </script>
 
 <style>

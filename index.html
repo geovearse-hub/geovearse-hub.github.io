@@ -324,7 +324,30 @@ nav.hnav::-webkit-scrollbar{display:none}
 .attr-table td{padding:5px 8px;border:1px solid var(--border);font-family:var(--mono);white-space:nowrap;cursor:pointer;color:var(--text)}
 .attr-table tr:hover td{background:var(--g5);color:var(--g1)}
 .attr-table tr.hl td{background:rgba(54,179,106,.12)!important;color:var(--g1)!important;font-weight:800}
-
+.attr-calc-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  background:var(--panel);
+}
+.attr-calc-bar input{
+  min-width:180px;
+  flex:1;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:8px;
+  padding:7px 10px;
+  outline:none;
+  font-family:var(--font);
+  font-size:11px;
+}
+.attr-calc-bar input:focus{
+  border-color:var(--g1);
+}
 /* Draw toolbar */
 #draw-toolbar{
   position:absolute;top:14px;left:50%;transform:translateX(-50%);
@@ -584,7 +607,59 @@ nav.hnav::-webkit-scrollbar{display:none}
     <input type="file" id="proj-fi" accept=".gvp,.json" style="display:none" onchange="loadProject(this.files[0]);this.value=''">
     <button class="nb" onclick="openM('m-raster')"><i class="fa-solid fa-satellite-dish"></i> راستر</button>
   </nav>
+   function runAttrCalc(){
+  const lyr = layers.find(l => l.id === activeId) || layers[0];
+  if(!lyr || !lyr.features || !lyr.features.length){
+    showT('⚠️ لا توجد طبقة صالحة للحساب');
+    return;
+  }
 
+  const fieldName = (document.getElementById('calc-field-name')?.value || '').trim();
+  const expr = (document.getElementById('calc-expression')?.value || '').trim();
+
+  if(!fieldName){
+    showT('⚠️ اكتب اسم الحقل أولاً');
+    return;
+  }
+  if(!expr){
+    showT('⚠️ اكتب المعادلة أولاً');
+    return;
+  }
+
+  let updated = 0;
+
+  try{
+ const filteredRows = filterFeat(lyr.features, attrFilter);
+filteredRows.forEach((f) => {
+  const idx = lyr.features.indexOf(f);});
+      if(!f.properties) f.properties = {};
+
+      const props = {...f.properties};
+
+      const fn = new Function(
+        'props',
+        'feature',
+        'index',
+        `
+        with(props){
+          return (${expr});
+        }
+        `
+      );
+
+      const result = fn(props, f, idx);
+      f.properties[fieldName] = result;
+      updated++;
+    });
+
+    renderAttrTable(lyr);
+    updateAllUI?.();
+    showT('🧮 تم تطبيق العملية على ' + updated + ' سجل');
+  }catch(err){
+    console.error(err);
+    showT('⚠️ خطأ في المعادلة: ' + err.message);
+  }
+}
   <div class="h-search">
     <div class="srch-box">
       <i class="fa-solid fa-search"></i>
@@ -764,7 +839,14 @@ nav.hnav::-webkit-scrollbar{display:none}
       </div>
       <div class="attr-body"><table class="attr-table"><thead id="attr-thead"><tr><th>اختر طبقة لعرض بياناتها</th></tr></thead><tbody id="attr-tbody"></tbody></table></div>
     </div>
-
+<div class="attr-calc-bar">
+  <input id="calc-field-name" type="text" placeholder="اسم الحقل، مثال: density">
+  <input id="calc-expression" type="text" placeholder="المعادلة، مثال: Number(population)/Number(area)">
+  <button class="dtbtn" onclick="runAttrCalc()">
+    <i class="fa-solid fa-calculator"></i>
+    تطبيق
+  </button>
+</div>
     <!-- FEATURE INFO FLOAT -->
     <div id="feat-info-float" class="float-panel">
       <div class="fif-hdr"><span id="fif-title"><i class="fa-solid fa-info-circle"></i> معلومات المعلم</span><button class="da" onclick="document.getElementById('feat-info-float').style.display='none'"><i class="fa-solid fa-xmark"></i></button></div>
@@ -1983,7 +2065,7 @@ function renderAttrTable(lyr,hlIdx=-1){
   const thead=document.getElementById('attr-thead'),tbody=document.getElementById('attr-tbody');
   if(!lyr){thead.innerHTML='<tr><th>لا توجد طبقة</th></tr>';tbody.innerHTML='';return;}
   const rows=filterFeat(lyr.features,attrFilter);
-  const keys=[...new Set(rows.flatMap(f=>Object.keys(f.properties||{})))];
+const keys = [...new Set(lyr.features.flatMap(f => Object.keys(f.properties || {})))];
   document.getElementById('attr-title').innerHTML=`<i class="fa-solid fa-table"></i> ${lyr.name}`;
   thead.innerHTML='<tr><th>#</th>'+keys.map(k=>`<th>${k}</th>`).join('')+'</tr>';
   tbody.innerHTML=rows.map(f=>{

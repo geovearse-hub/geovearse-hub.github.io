@@ -556,7 +556,59 @@ nav.hnav::-webkit-scrollbar{display:none}
     #sb:has(#geopy-tab.act) #tab-geopy {
         display: block !important;
     }
-</style></head>
+</style>
+
+<!-- OpenLayers 9 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.0.0/ol.css" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/ol@v9.0.0/dist/ol.js"></script>
+
+<!-- Leaflet-Geoman -->
+<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Leaflet Minimap -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-minimap/3.6.1/Control.MiniMap.min.js"></script>
+
+<!-- Google Earth Engine -->
+<script src="https://ajax.googleapis.com/ajax/libs/earthengine/0.1.373/ee_api_js.js"></script>
+
+<style>
+.hdr-tools-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    border-left: 1px solid var(--border);
+}
+.hdr-tools-group:first-child {
+    border-left: none;
+}
+.hdr-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.hdr-btn:hover, .hdr-btn.on {
+    background: var(--g5);
+    color: var(--g1);
+    border-color: var(--border2);
+}
+</style>
+</head>
 <body class="" style="">
 <!-- LOADING -->
 <!-- HEADER -->
@@ -571,31 +623,44 @@ nav.hnav::-webkit-scrollbar{display:none}
 <div class="logo-ver">v1.0.3</div>
 </div>
 </a>
-<nav class="hnav">
-<button class="nb ai-style-change-1" onclick="openM('m-feat')" style="flex-shrink: 0;" title="معلم"><i class="fa-solid fa-location-dot ai-style-change-19"></i></button>
-<button class="nb ai-style-change-2" onclick="openM('m-tools')" style="flex-shrink: 0;" title="أدوات"><i class="fa-solid fa-screwdriver-wrench ai-style-change-20"></i></button>
-<button class="nb ai-style-change-3" onclick="openExportModal()" style="flex-shrink: 0;" title="تصدير"><i class="fa-solid fa-file-export ai-style-change-21"></i></button>
-<button class="nb ai-style-change-4" onclick="saveProject()" style="flex-shrink: 0;" title="حفظ"><i class="fa-solid fa-floppy-disk ai-style-change-22"></i></button>
-<button class="nb ai-style-change-5" onclick="document.getElementById('proj-fi').click()" style="flex-shrink: 0;" title="فتح"><i class="fa-solid fa-folder-open ai-style-change-23"></i></button>
-<button class="nb ai-style-change-6" id="cinematic-start" onclick="startCinematic()" style="flex-shrink: 0;" title="🎥 Cinematic"><i class="fa-solid fa-film ai-style-change-24"></i></button>
-<button class="nb ai-style-change-7" id="cinematic-stop" onclick="stopCinematic()" style="flex-shrink: 0;" title="⛔ Stop"><i class="fa-solid fa-ban ai-style-change-25"></i></button>
-<button class="nb ai-style-change-8" id="render-mode-btn" onclick="enableRenderMode()" style="flex-shrink: 0;" title="🎬 رندر"><i class="fa-solid fa-video ai-style-change-26"></i></button>
-<button class="nb ai-style-change-9" id="export-image-btn" onclick="exportImage()" style="flex-shrink: 0;" title="📸 Export"><i class="fa-solid fa-camera ai-style-change-27"></i></button>
-<button class="nb ai-style-change-10" onclick="openM('m-raster')" style="flex-shrink: 0;" title="راستر"><i class="fa-solid fa-satellite-dish ai-style-change-28"></i></button>
+<nav class="hnav" style="display: flex; align-items: center; gap: 15px; flex: 1;">
+    <!-- General Tools -->
+    <div class="hdr-tools-group">
+        <button class="hdr-btn" onclick="openM('m-feat')" title="معلم"><i class="fa-solid fa-location-dot"></i></button>
+        <button class="hdr-btn" onclick="openM('m-tools')" title="أدوات"><i class="fa-solid fa-screwdriver-wrench"></i></button>
+        <button class="hdr-btn" onclick="openM('m-raster')" title="راستر"><i class="fa-solid fa-satellite-dish"></i></button>
+        <button class="hdr-btn" onclick="toggleAttrSearch()" title="البحث في البيانات"><i class="fa-solid fa-magnifying-glass-location"></i></button>
+        <button class="hdr-btn" onclick="toggleDrawToolbar()" title="الرسم الأساسي"><i class="fa-solid fa-pencil"></i></button>
+    </div>
+
+    <!-- Analysis Tools (New Section) -->
+    <div class="hdr-tools-group" title="أدوات التحليل الجيومكاني المتقدمة">
+        <button class="hdr-btn" onclick="toggleGeoman()" title="Leaflet-Geoman (رسم وتحرير متقدم)"><i class="fa-solid fa-draw-polygon"></i></button>
+        <button class="hdr-btn" onclick="initOpenLayers()" title="OpenLayers 9 (تحديد متقدم)"><i class="fa-solid fa-object-group"></i></button>
+        <button class="hdr-btn" onclick="openChartModal()" title="Chart.js (رسوم بيانية)"><i class="fa-solid fa-chart-pie"></i></button>
+        <button class="hdr-btn" onclick="toggleMinimap()" title="Minimap (خريطة مصغرة)"><i class="fa-solid fa-map-location-dot"></i></button>
+        <button class="hdr-btn" onclick="initEarthEngine()" title="Earth Engine API"><i class="fa-solid fa-earth-americas"></i></button>
+    </div>
+
+    <!-- Media / Export Tools -->
+    <div class="hdr-tools-group">
+        <button class="hdr-btn" id="cinematic-start" onclick="startCinematic()" title="🎥 Cinematic"><i class="fa-solid fa-film"></i></button>
+        <button class="hdr-btn" id="cinematic-stop" onclick="stopCinematic()" title="⛔ Stop"><i class="fa-solid fa-ban"></i></button>
+        <button class="hdr-btn" id="render-mode-btn" onclick="enableRenderMode()" title="🎬 رندر"><i class="fa-solid fa-video"></i></button>
+        <button class="hdr-btn" id="export-image-btn" onclick="exportImage()" title="📸 Export Image"><i class="fa-solid fa-camera"></i></button>
+        <button class="hdr-btn" onclick="openExportModal()" title="تصدير بيانات"><i class="fa-solid fa-file-export"></i></button>
+    </div>
 </nav>
-<div class="h-search">
-</div>
-<div class="h-actions">
-<div class="vtog">
-</div>
-<button class="icb ai-style-change-11 on" id="ai-btn" style="flex-shrink: 0;" title="Geo AI"><i class="fa-solid fa-robot ai-style-change-29"></i></button>
-<button class="icb ai-style-change-12" onclick="toggleDrawToolbar()" style="flex-shrink: 0;" title="الرسم"><i class="fa-solid fa-pencil ai-style-change-30"></i></button>
-<button class="icb ai-style-change-13" onclick="toggleAttrSearch()" style="flex-shrink: 0;" title="البحث في البيانات"><i class="fa-solid fa-magnifying-glass-location ai-style-change-31"></i></button>
-<button class="icb ai-style-change-14" onclick="switchRightTab('style')" style="flex-shrink: 0;" title="السيمبولوجي"><i class="fa-solid fa-brush ai-style-change-32"></i></button>
-<button class="icb ai-style-change-15" onclick="switchRightTab('dashboard')" style="flex-shrink: 0;" title="Dashboard"><i class="fa-solid fa-chart-column ai-style-change-33"></i></button>
-<button class="icb ai-style-change-16" onclick="cycleTheme()" style="flex-shrink: 0;" title="تبديل الثيم"><i class="fa-solid fa-palette ai-style-change-34"></i></button>
-<button class="icb ai-style-change-17" onclick="openProjectManager()" style="flex-shrink: 0;" title="المشاريع السابقة"><i class="fa-solid fa-folder-tree ai-style-change-35"></i></button>
-<button class="acct-mini ai-style-change-18" onclick="openAuthModal()" style="width: 32px; height: 32px; padding: 0px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background-color: rgb(244, 246, 248); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; flex-shrink: 0;" title="ضيف"><i class="fa-solid fa-user ai-style-change-36"></i></button>
+<div class="h-search"></div>
+<div class="h-actions" style="display: flex; align-items: center; gap: 8px;">
+    <button class="hdr-btn on" id="ai-btn" title="Geo AI Master"><i class="fa-solid fa-robot"></i></button>
+    <button class="hdr-btn" onclick="switchRightTab('style')" title="السيمبولوجي"><i class="fa-solid fa-brush"></i></button>
+    <button class="hdr-btn" onclick="switchRightTab('dashboard')" title="Dashboard"><i class="fa-solid fa-chart-column"></i></button>
+    <button class="hdr-btn" onclick="cycleTheme()" title="تبديل الثيم"><i class="fa-solid fa-palette"></i></button>
+    <button class="hdr-btn" onclick="openProjectManager()" title="المشاريع السابقة"><i class="fa-solid fa-folder-tree"></i></button>
+    <button class="hdr-btn" onclick="saveProject()" title="حفظ المشروع"><i class="fa-solid fa-floppy-disk"></i></button>
+    <button class="hdr-btn" onclick="document.getElementById('proj-fi').click()" title="فتح مشروع"><i class="fa-solid fa-folder-open"></i></button>
+    <button class="hdr-btn" style="border-radius: 50%; background: var(--g1); color: #fff;" onclick="openAuthModal()" title="حسابي"><i class="fa-solid fa-user"></i></button>
 </div>
 </header>
 <!-- APP -->
@@ -932,7 +997,7 @@ def run_tool():
 <button class="tool-btn" onclick="clearAllLayers()" style="color:#c0392b"><i class="fa-solid fa-trash"></i> حذف جميع الطبقات</button>
 </div>
 </div>
-<div class="tp-footer">GeoVerse GIS Platform <span>v1.0.3</span><br/>by. <span>Khaled ELSerrafy with Abdelfatah Mohamed</span></div>
+<div class="tp-footer">GeoVerse GIS Platform <span>v1.0.3</span><br/>by. <span>Khaled ELSerrafy </span></div>
 </aside>
 </div>
 <!-- MODAL: ADD LAYER -->
@@ -3911,6 +3976,90 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
     }catch(e){}
   });
 })();
+</script>
+
+<!-- Geospatial Analysis Tools Initialization -->
+<script>
+// Leaflet-Geoman Initialization
+function toggleGeoman() {
+    if (!map.pm) {
+        console.error("Geoman is not loaded.");
+        return;
+    }
+    
+    // Toggle the Geoman toolbar
+    map.pm.toggleControls();
+    
+    // Setup Geoman controls if they aren't added yet
+    if (!map.pm.controlsVisible()) {
+        map.pm.addControls({
+            position: 'topleft',
+            drawCircleMarker: false,
+            drawPolyline: true,
+            editMode: true,
+            dragMode: true,
+            cutPolygon: true,
+            removalMode: true,
+            drawMarker: true,
+            drawPolygon: true,
+            drawRectangle: true,
+            drawCircle: true,
+            drawText: true
+        });
+        
+        // Setup snapping and measurements
+        map.pm.setGlobalOptions({
+            snappable: true,
+            snapDistance: 20,
+            allowSelfIntersection: false,
+            measurements: { measurement: true, displayFormat: 'metric' }
+        });
+        
+        if (!window.geomanDrawHooked) {
+            map.on('pm:create', function(e) {
+                const geojson = e.layer.toGeoJSON();
+                map.removeLayer(e.layer);
+                const fc = { type: 'FeatureCollection', features: [geojson] };
+                addLayerFromGeoJSON(fc, 'رسم (Geoman)', '#e74c3c', 80);
+            });
+            window.geomanDrawHooked = true;
+        }
+        
+        console.log("Geoman tools initialized with Snapping, Measurements, Editing, and Auto-Layer generation.");
+    }
+}
+
+// OpenLayers 9 Initialization Stub
+window.olMap = null;
+function initOpenLayers() {
+    console.log("Initializing OpenLayers 9 for advanced selection (ArcGIS style Drag-box, Multi-select)...");
+    alert("OpenLayers 9 CDN Loaded.\n\nOpenLayers allows advanced selection interactions like ArcGIS. Since GeoVerse currently uses Leaflet as the primary map engine, integrating OpenLayers side-by-side or as a layer requires further architectural setup. The CDN is now ready for use.");
+}
+
+// Chart.js Helper
+function openChartModal() {
+    console.log("Opening Chart.js panel for data visualization...");
+    alert("Chart.js is ready for data visualization!");
+}
+
+// Leaflet Minimap
+window.minimapControl = null;
+function toggleMinimap() {
+    if (!window.minimapControl) {
+        var osm2 = new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {minZoom: 0, maxZoom: 13});
+        window.minimapControl = new L.Control.MiniMap(osm2, { toggleDisplay: true, position: 'bottomright' }).addTo(map);
+        console.log("Leaflet Minimap initialized.");
+    } else {
+        map.removeControl(window.minimapControl);
+        window.minimapControl = null;
+    }
+}
+
+// Earth Engine API Stub
+function initEarthEngine() {
+    console.log("Earth Engine API Loaded.");
+    alert("Google Earth Engine API is loaded.\n\nTo use it, a Client ID or Service Account authentication flow must be configured.");
+}
 </script>
 
 </body></html>

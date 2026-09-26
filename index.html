@@ -1755,7 +1755,7 @@ const TILES={
   googleHybrid:L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}),
   cartoLight:L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}),
 };
-const map=L.map('m2d',{zoomControl:false,center:[27,34],zoom:7});
+const map=L.map('m2d',{zoomControl:false,center:[27,34],zoom:7,preferCanvas:true});
 TILES.osm.addTo(map);
 drawVertexLayer=L.layerGroup().addTo(map);
 
@@ -1841,6 +1841,11 @@ function ptStyle(lyr,feat,hl=false){
 ═══════════════════════════════════════════════════════════════ */
 function refreshLayerOnMap(lyr){
   if(lyr.leafletLayer) map.removeLayer(lyr.leafletLayer);
+  /* L.geoJSON walks lyr.features in order and calls onEachFeature once per
+     feature, so a running counter gives the correct index in O(1) instead of
+     lyr.features.indexOf(feat) which is O(n) per feature (O(n²) overall —
+     this was the main cause of freezing on large imports). */
+  let _idxCounter=0;
   lyr.leafletLayer=L.geoJSON({type:'FeatureCollection',features:lyr.features},{
     style:(feat)=>makeStyle(lyr,feat),
     pointToLayer:(feat,ll)=>{
@@ -1848,7 +1853,7 @@ function refreshLayerOnMap(lyr){
       return L.circleMarker(ll,{radius:7,color:'#fff',weight:2,fillColor:col,fillOpacity:.9});
     },
     onEachFeature:(feat,leafL)=>{
-      const idx=lyr.features.indexOf(feat);
+      const idx=_idxCounter++;
       leafL.on('click',ev=>{
         L.DomEvent.stopPropagation(ev);
         const isMulti=!!ev.originalEvent?.shiftKey;
@@ -2079,12 +2084,21 @@ function createEmptyLayer(name,color='#166534',opacity=85,geomType='Point'){
   refreshLayerOnMap(lyr); layers.push(lyr); activeId=lyr.id; return lyr;
 }
 
+/* Above this many features, skip the auto area/length turf computation below —
+   it's a nice-to-have convenience field, but running two turf calls per
+   feature over tens of thousands of features turns into several seconds of
+   uninterrupted main-thread work. Area/length can still be added later via
+   the statistics/analysis tools if needed. */
+const AUTO_MEASURE_FEATURE_LIMIT=4000;
+
 function addLayerFromGeoJSON(fc,name,color='#166534',opacity=85){
-  /* Auto-add area/length fields */
-  const features=(fc.features||[]).map(f=>{
+  const rawFeatures=fc.features||[];
+  const skipAutoMeasure=rawFeatures.length>AUTO_MEASURE_FEATURE_LIMIT;
+  /* Auto-add area/length fields (skipped for very large layers, see above) */
+  const features=rawFeatures.map(f=>{
     const p={...(f.properties||{})};
     const gt=f.geometry?.type||'';
-    if(typeof turf!=='undefined'){
+    if(!skipAutoMeasure&&typeof turf!=='undefined'){
       if(gt.includes('Polygon')&&!p['المساحة_km2']){
         try{p['المساحة_km2']=parseFloat(turf.area(f)/1e6).toFixed(4);}catch(e){}
       }
@@ -2110,6 +2124,7 @@ function addLayerFromGeoJSON(fc,name,color='#166534',opacity=85){
 async function doAddLayer(){
   const btn=document.getElementById('add-layer-confirm-btn');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جارٍ...';}
+  await yieldToBrowser(); // let the spinner actually paint before any heavy synchronous work starts
   const name=document.getElementById('l-name').value.trim()||('Layer '+(layers.length+1));
   const color=document.getElementById('l-color').value;
   const opacity=parseFloat(document.getElementById('l-op').value||'85');
@@ -2154,7 +2169,9 @@ async function doAddLayer(){
       const fnLower=pendingFile.name.toLowerCase();
       const isOsm=fnLower.endsWith('.osm')||fnLower.endsWith('.xml')||/^\s*(<\?xml|<osm)/i.test(text);
       if(isOsm){
-        const createdLayers=addLayersFromOsm(text,name,opacity);
+        const createdLayers=await addLayersFromOsm(text,name,opacity,(stage,detail)=>{
+          if(btn) btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> '+stage+' ('+detail+')';
+        });
         closeM('m-add'); pendingFile=null;
         document.getElementById('fp').style.display='none';
         const namesPreview=createdLayers.slice(0,5).map(l=>l.name).join('، ')+(createdLayers.length>5?' …':'');
@@ -2196,55 +2213,87 @@ function csvToGeoJSON(text){
   return{type:'FeatureCollection',features};
 }
 
-function parseOsmXml(text){
+/* Yields control back to the browser (lets it paint and process pending
+   input) so long imports don't read as a frozen tab. rAF ensures a real
+   paint happens before we resume; the trailing setTimeout(0) also lets
+   queued UI events run. */
+function yieldToBrowser(){
+  return new Promise(resolve=>{
+    if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>setTimeout(resolve,0));
+    else setTimeout(resolve,0);
+  });
+}
+
+const OSM_PARSE_CHUNK=3000; // elements processed between yields
+
+async function parseOsmXml(text,onProgress){
   const xml=new DOMParser().parseFromString(text,'application/xml');
   if(xml.querySelector('parsererror')) throw new Error('ملف OSM غير صالح (XML تالف)');
   const osmRoot=xml.querySelector('osm');
   if(!osmRoot) throw new Error('الملف لا يحتوي على بيانات OSM (لا يوجد عنصر <osm>)');
 
+  const nodeEls=xml.querySelectorAll('node');
+  const wayEls=xml.querySelectorAll('way');
   const nodes={}; // id -> {lat,lon,tags}
-  xml.querySelectorAll('node').forEach(n=>{
+
+  for(let i=0;i<nodeEls.length;i++){
+    const n=nodeEls[i];
     const id=n.getAttribute('id');
     const lat=parseFloat(n.getAttribute('lat'));
     const lon=parseFloat(n.getAttribute('lon'));
     const tags={};
     n.querySelectorAll('tag').forEach(t=>{tags[t.getAttribute('k')]=t.getAttribute('v');});
     nodes[id]={lat,lon,tags};
-  });
+    if(i>0&&i%OSM_PARSE_CHUNK===0){
+      onProgress?.('جارٍ قراءة النقاط',i+'/'+nodeEls.length);
+      await yieldToBrowser();
+    }
+  }
 
   const usedAsWayVertex=new Set();
   const features=[];
   const areaHints=/^(building|landuse|area|natural|leisure|amenity)$/;
 
-  xml.querySelectorAll('way').forEach(w=>{
+  for(let i=0;i<wayEls.length;i++){
+    const w=wayEls[i];
     const refs=[...w.querySelectorAll('nd')].map(nd=>nd.getAttribute('ref'));
     refs.forEach(r=>usedAsWayVertex.add(r));
     const coords=refs.map(r=>nodes[r]).filter(Boolean).map(n=>[n.lon,n.lat]);
-    if(coords.length<2) return;
-    const tags={};
-    w.querySelectorAll('tag').forEach(t=>{tags[t.getAttribute('k')]=t.getAttribute('v');});
-    const isClosed=refs.length>2&&refs[0]===refs[refs.length-1];
-    const looksLikeArea=isClosed&&(tags.area==='yes'||Object.keys(tags).some(k=>areaHints.test(k)&&tags[k]!=='no'));
-    const geometry=looksLikeArea
-      ?{type:'Polygon',coordinates:[coords]}
-      :{type:'LineString',coordinates:coords};
-    features.push({type:'Feature',geometry,properties:{...tags,osm_id:w.getAttribute('id'),osm_type:'way'}});
-  });
+    if(coords.length>=2){
+      const tags={};
+      w.querySelectorAll('tag').forEach(t=>{tags[t.getAttribute('k')]=t.getAttribute('v');});
+      const isClosed=refs.length>2&&refs[0]===refs[refs.length-1];
+      const looksLikeArea=isClosed&&(tags.area==='yes'||Object.keys(tags).some(k=>areaHints.test(k)&&tags[k]!=='no'));
+      const geometry=looksLikeArea
+        ?{type:'Polygon',coordinates:[coords]}
+        :{type:'LineString',coordinates:coords};
+      features.push({type:'Feature',geometry,properties:{...tags,osm_id:w.getAttribute('id'),osm_type:'way'}});
+    }
+    if(i>0&&i%OSM_PARSE_CHUNK===0){
+      onProgress?.('جارٍ بناء الخطوط والمضلعات',i+'/'+wayEls.length);
+      await yieldToBrowser();
+    }
+  }
 
   // Standalone tagged nodes (POIs) that aren't just shape vertices of a way
-  Object.entries(nodes).forEach(([id,n])=>{
-    if(usedAsWayVertex.has(id)) return;
-    if(!Object.keys(n.tags).length) return;
-    if(isNaN(n.lat)||isNaN(n.lon)) return;
-    features.push({type:'Feature',geometry:{type:'Point',coordinates:[n.lon,n.lat]},properties:{...n.tags,osm_id:id,osm_type:'node'}});
-  });
+  const nodeEntries=Object.entries(nodes);
+  for(let i=0;i<nodeEntries.length;i++){
+    const[id,n]=nodeEntries[i];
+    if(!usedAsWayVertex.has(id)&&Object.keys(n.tags).length&&!isNaN(n.lat)&&!isNaN(n.lon)){
+      features.push({type:'Feature',geometry:{type:'Point',coordinates:[n.lon,n.lat]},properties:{...n.tags,osm_id:id,osm_type:'node'}});
+    }
+    if(i>0&&i%OSM_PARSE_CHUNK===0){
+      onProgress?.('جارٍ استخراج النقاط المستقلة',i+'/'+nodeEntries.length);
+      await yieldToBrowser();
+    }
+  }
 
   if(!features.length) throw new Error('لم يتم العثور على معالم صالحة داخل ملف OSM');
   return features;
 }
 
-function osmXmlToGeoJSON(text){
-  return{type:'FeatureCollection',features:parseOsmXml(text)};
+async function osmXmlToGeoJSON(text){
+  return{type:'FeatureCollection',features:await parseOsmXml(text)};
 }
 
 /* Recognized primary OSM classification keys, in priority order.
@@ -2274,20 +2323,27 @@ function hslToHex(h,s,l){
 }
 
 /* Groups parsed OSM features by their primary tag key and adds one layer per key.
+   Async and chunked (parsing + one yield per created layer) so large exports
+   don't lock up the tab for several seconds at a time — the browser gets to
+   paint the progress text and stay responsive between each step.
    Returns the list of created layers. */
-function addLayersFromOsm(text,baseName,opacity){
-  const features=parseOsmXml(text);
+async function addLayersFromOsm(text,baseName,opacity,onProgress){
+  const features=await parseOsmXml(text,onProgress);
   const groups={};
   features.forEach(f=>{
     const key=osmFeatureKey(f.properties||{});
     (groups[key]=groups[key]||[]).push(f);
   });
+  const entries=Object.entries(groups);
   const created=[];
-  Object.entries(groups).forEach(([key,feats])=>{
+  for(let i=0;i<entries.length;i++){
+    const[key,feats]=entries[i];
     const lyrName=(baseName?baseName+' — ':'')+key;
+    onProgress?.('جارٍ إنشاء الطبقات',(i+1)+'/'+entries.length+' — '+key);
     const lyr=addLayerFromGeoJSON({type:'FeatureCollection',features:feats},lyrName,osmColorForKey(key),opacity);
     created.push(lyr);
-  });
+    await yieldToBrowser();
+  }
   return created;
 }
 
@@ -2396,24 +2452,21 @@ function deleteRaster(id){const idx=rasterLayers.findIndex(x=>x.id===id);if(idx=
 function renderAttrTable(lyr,hlIdx=-1){
   const thead=document.getElementById('attr-thead'),tbody=document.getElementById('attr-tbody');
   if(!lyr){thead.innerHTML='<tr><th>لا توجد طبقة</th></tr>';tbody.innerHTML='';return;}
-  const rows=filterFeat(lyr.features,attrFilter);
-  const keys=[...new Set(rows.flatMap(f=>Object.keys(f.properties||{})))];
+  /* Carry each feature's original index alongside it (O(n)) instead of
+     re-searching for it with indexOf per row (O(n) per row = O(n²) total). */
+  const term=(attrFilter||'').toLowerCase();
+  const indexed=lyr.features.map((f,oi)=>({f,oi}));
+  const rows=term?indexed.filter(r=>JSON.stringify(r.f.properties||{}).toLowerCase().includes(term)):indexed;
+  const keys=[...new Set(rows.flatMap(r=>Object.keys(r.f.properties||{})))];
   document.getElementById('attr-title').innerHTML=`<i class="fa-solid fa-table"></i> ${lyr.name}`;
   thead.innerHTML='<tr><th>#</th>'+keys.map(k=>`<th>${k}</th>`).join('')+'</tr>';
-  tbody.innerHTML=rows.map(f=>{
-    const oi=lyr.features.indexOf(f);
+  tbody.innerHTML=rows.map(({f,oi})=>{
     const isSelected=!!getSelectedEntry(lyr.id,oi);
     const cls=`${oi===hlIdx?'hl ':''}${isSelected?'sel multi':''}`.trim();
     return `<tr class="${cls}" onclick="zoomToFeat('${lyr.id}',${oi},event)"><td>${oi+1}</td>${keys.map(k=>`<td ondblclick="editCell('${lyr.id}',${oi},'${k.replace(/'/g,"\\'")}');event.stopPropagation()">${(f.properties||{})[k]??''}</td>`).join('')}</tr>`;
   }).join('');
   document.getElementById('attr-layer-sel').value=lyr.id;
   if(hlIdx>-1)setTimeout(()=>{const hl=tbody.querySelector('.hl');if(hl)hl.scrollIntoView({block:'center'});},80);
-}
-
-function filterFeat(features,term){
-  if(!term) return features;
-  const t=term.toLowerCase();
-  return features.filter(f=>JSON.stringify(f.properties||{}).toLowerCase().includes(t));
 }
 
 function filterAttrTable(term){attrFilter=term.trim();const lyr=layers.find(l=>l.id===activeId)||layers[0];renderAttrTable(lyr);}

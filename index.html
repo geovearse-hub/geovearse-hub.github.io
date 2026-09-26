@@ -1019,7 +1019,7 @@ def run_tool():
 <div class="mb">
 <div class="sttl" style="margin-top:0">1. مصدر البيانات</div>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">
-<div class="so sel" id="so-file" onclick="selSrc('file')"><div class="so-i">📁</div><div><b style="font-size:10px">ملف محلي</b><div class="small">GeoJSON,CSV</div></div><div class="so-ck"><i class="fa-solid fa-check" style="font-size:7px"></i></div></div>
+<div class="so sel" id="so-file" onclick="selSrc('file')"><div class="so-i">📁</div><div><b style="font-size:10px">ملف محلي</b><div class="small">GeoJSON,CSV,OSM</div></div><div class="so-ck"><i class="fa-solid fa-check" style="font-size:7px"></i></div></div>
 <div class="so" id="so-shp" onclick="selSrc('shp')"><div class="so-i">🗂️</div><div><b style="font-size:10px">Shapefile</b><div class="small">ملفات SHP المترابطة أو ZIP</div></div><div class="so-ck"></div></div>
 <div class="so" id="so-url" onclick="selSrc('url')"><div class="so-i">🔗</div><div><b style="font-size:10px">رابط URL</b><div class="small">GeoJSON</div></div><div class="so-ck"></div></div>
 <div class="so" id="so-manual" onclick="selSrc('manual')"><div class="so-i">✏️</div><div><b style="font-size:10px">طبقة فارغة</b><div class="small">يدوي</div></div><div class="so-ck"></div></div>
@@ -1028,9 +1028,9 @@ def run_tool():
 <div class="uz" onclick="document.getElementById('fi').click()">
 <i class="fa-solid fa-cloud-arrow-up" style="font-size:20px;color:var(--g2)"></i>
 <p style="margin-top:6px;font-size:11px">اسحب الملف هنا أو اضغط للاختيار</p>
-<div class="small">يدعم .geojson .json .csv</div>
+<div class="small">يدعم .geojson .json .csv .osm</div>
 </div>
-<input accept=".geojson,.json,.csv" id="fi" onchange="fileSelected(this.files[0])" style="display:none" type="file"/>
+<input accept=".geojson,.json,.csv,.osm,.xml" id="fi" onchange="fileSelected(this.files[0])" style="display:none" type="file"/>
 <div id="fp" style="display:none;margin-top:6px;padding:7px;border-radius:8px;background:var(--g5);border:1px solid var(--border2);color:var(--g1);font-size:10px"></div>
 </div>
 <div id="sp-shp" style="display:none">
@@ -2151,9 +2151,20 @@ async function doAddLayer(){
     if(srcMode==='file'){
       if(!pendingFile) return showT('⚠️ اختر ملفاً');
       const text=await pendingFile.text();
+      const fnLower=pendingFile.name.toLowerCase();
+      const isOsm=fnLower.endsWith('.osm')||fnLower.endsWith('.xml')||/^\s*(<\?xml|<osm)/i.test(text);
+      if(isOsm){
+        const createdLayers=addLayersFromOsm(text,name,opacity);
+        closeM('m-add'); pendingFile=null;
+        document.getElementById('fp').style.display='none';
+        const namesPreview=createdLayers.slice(0,5).map(l=>l.name).join('، ')+(createdLayers.length>5?' …':'');
+        showT('✓ تم إنشاء '+createdLayers.length+' طبقة من ملف OSM حسب نوع البيانات: '+namesPreview);
+        return;
+      }
       let fc;
-      if(pendingFile.name.toLowerCase().endsWith('.csv')) fc=csvToGeoJSON(text);
+      if(fnLower.endsWith('.csv')) fc=csvToGeoJSON(text);
       else fc=JSON.parse(text);
+      if(!fc||!fc.features||!fc.features.length) throw new Error('لا توجد معالم قابلة للقراءة في الملف');
       addLayerFromGeoJSON(fc,name,color,opacity);
       closeM('m-add'); pendingFile=null;
       document.getElementById('fp').style.display='none';
@@ -2183,6 +2194,101 @@ function csvToGeoJSON(text){
     return{type:'Feature',geometry:{type:'Point',coordinates:[parseFloat(obj[lngKey]),parseFloat(obj[latKey])]},properties:obj};
   }).filter(f=>!isNaN(f.geometry.coordinates[0])&&!isNaN(f.geometry.coordinates[1]));
   return{type:'FeatureCollection',features};
+}
+
+function parseOsmXml(text){
+  const xml=new DOMParser().parseFromString(text,'application/xml');
+  if(xml.querySelector('parsererror')) throw new Error('ملف OSM غير صالح (XML تالف)');
+  const osmRoot=xml.querySelector('osm');
+  if(!osmRoot) throw new Error('الملف لا يحتوي على بيانات OSM (لا يوجد عنصر <osm>)');
+
+  const nodes={}; // id -> {lat,lon,tags}
+  xml.querySelectorAll('node').forEach(n=>{
+    const id=n.getAttribute('id');
+    const lat=parseFloat(n.getAttribute('lat'));
+    const lon=parseFloat(n.getAttribute('lon'));
+    const tags={};
+    n.querySelectorAll('tag').forEach(t=>{tags[t.getAttribute('k')]=t.getAttribute('v');});
+    nodes[id]={lat,lon,tags};
+  });
+
+  const usedAsWayVertex=new Set();
+  const features=[];
+  const areaHints=/^(building|landuse|area|natural|leisure|amenity)$/;
+
+  xml.querySelectorAll('way').forEach(w=>{
+    const refs=[...w.querySelectorAll('nd')].map(nd=>nd.getAttribute('ref'));
+    refs.forEach(r=>usedAsWayVertex.add(r));
+    const coords=refs.map(r=>nodes[r]).filter(Boolean).map(n=>[n.lon,n.lat]);
+    if(coords.length<2) return;
+    const tags={};
+    w.querySelectorAll('tag').forEach(t=>{tags[t.getAttribute('k')]=t.getAttribute('v');});
+    const isClosed=refs.length>2&&refs[0]===refs[refs.length-1];
+    const looksLikeArea=isClosed&&(tags.area==='yes'||Object.keys(tags).some(k=>areaHints.test(k)&&tags[k]!=='no'));
+    const geometry=looksLikeArea
+      ?{type:'Polygon',coordinates:[coords]}
+      :{type:'LineString',coordinates:coords};
+    features.push({type:'Feature',geometry,properties:{...tags,osm_id:w.getAttribute('id'),osm_type:'way'}});
+  });
+
+  // Standalone tagged nodes (POIs) that aren't just shape vertices of a way
+  Object.entries(nodes).forEach(([id,n])=>{
+    if(usedAsWayVertex.has(id)) return;
+    if(!Object.keys(n.tags).length) return;
+    if(isNaN(n.lat)||isNaN(n.lon)) return;
+    features.push({type:'Feature',geometry:{type:'Point',coordinates:[n.lon,n.lat]},properties:{...n.tags,osm_id:id,osm_type:'node'}});
+  });
+
+  if(!features.length) throw new Error('لم يتم العثور على معالم صالحة داخل ملف OSM');
+  return features;
+}
+
+function osmXmlToGeoJSON(text){
+  return{type:'FeatureCollection',features:parseOsmXml(text)};
+}
+
+/* Recognized primary OSM classification keys, in priority order.
+   A feature is grouped under the first of these keys that appears in its tags. */
+const OSM_PRIMARY_KEYS=['highway','building','landuse','natural','waterway','amenity','leisure','shop','tourism','railway','boundary','place','man_made','power','barrier','aeroway','historic','sport','water','craft','office','emergency','military','public_transport','geological','landcover'];
+const OSM_META_KEYS=new Set(['name','ref','source','note','fixme','created_by','osm_id','osm_type','addr:housenumber','addr:street','addr:city','addr:postcode','addr:country','wikidata','wikipedia']);
+
+function osmFeatureKey(props){
+  for(const k of OSM_PRIMARY_KEYS){ if(props[k]!==undefined) return k; }
+  const other=Object.keys(props).find(k=>!OSM_META_KEYS.has(k)&&!k.startsWith('addr:')&&k!=='osm_id'&&k!=='osm_type');
+  return other||'other';
+}
+
+/* Deterministic color per key so the same tag always gets the same shade across imports */
+function osmColorForKey(key){
+  let h=0; for(let i=0;i<key.length;i++) h=(h*31+key.charCodeAt(i))>>>0;
+  const hue=h%360;
+  return hslToHex(hue,62,42);
+}
+function hslToHex(h,s,l){
+  s/=100; l/=100;
+  const k=n=>(n+h/30)%12;
+  const a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  const toHex=x=>Math.round(255*x).toString(16).padStart(2,'0');
+  return '#'+toHex(f(0))+toHex(f(8))+toHex(f(4));
+}
+
+/* Groups parsed OSM features by their primary tag key and adds one layer per key.
+   Returns the list of created layers. */
+function addLayersFromOsm(text,baseName,opacity){
+  const features=parseOsmXml(text);
+  const groups={};
+  features.forEach(f=>{
+    const key=osmFeatureKey(f.properties||{});
+    (groups[key]=groups[key]||[]).push(f);
+  });
+  const created=[];
+  Object.entries(groups).forEach(([key,feats])=>{
+    const lyrName=(baseName?baseName+' — ':'')+key;
+    const lyr=addLayerFromGeoJSON({type:'FeatureCollection',features:feats},lyrName,osmColorForKey(key),opacity);
+    created.push(lyr);
+  });
+  return created;
 }
 
 function fileSelected(f){pendingFile=f;document.getElementById('fp').style.display='block';document.getElementById('fp').textContent='📄 '+f.name;if(!document.getElementById('l-name').value)document.getElementById('l-name').value=f.name.replace(/\.[^/.]+$/,'');}

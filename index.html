@@ -1192,6 +1192,27 @@ def run_tool():
 <div style="color: #6a8e8e; font-size: 10px; margin-top: 2px;">تقاطع أو قص طبقة بأخرى</div>
 </div>
 </div>
+<div class="tool-card" onclick="closeM('m-tools');openM('m-overpass')" style="background: #fff; border: 1px solid #d1e3e3; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; cursor: pointer;">
+<i class="fa-solid fa-cloud-arrow-down" style="color: #2c5e5e; font-size: 20px;"></i>
+<div style="text-align: right; margin-top: 10px;">
+<div style="font-weight: bold; color: #1a3a3a; font-size: 13px;">بيانات OSM حية</div>
+<div style="color: #6a8e8e; font-size: 10px; margin-top: 2px;">جلب طرق/مباني/نقاط عبر Overpass API</div>
+</div>
+</div>
+<div class="tool-card" onclick="closeM('m-tools');openM('m-geocode')" style="background: #fff; border: 1px solid #d1e3e3; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; cursor: pointer;">
+<i class="fa-solid fa-location-dot" style="color: #2c5e5e; font-size: 20px;"></i>
+<div style="text-align: right; margin-top: 10px;">
+<div style="font-weight: bold; color: #1a3a3a; font-size: 13px;">بحث جغرافي (Geocoding)</div>
+<div style="color: #6a8e8e; font-size: 10px; margin-top: 2px;">ابحث عن مكان بالاسم وانتقل إليه</div>
+</div>
+</div>
+<div class="tool-card" onclick="closeM('m-tools');openM('m-spatial-search')" style="background: #fff; border: 1px solid #d1e3e3; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; cursor: pointer;">
+<i class="fa-solid fa-magnifying-glass-location" style="color: #2c5e5e; font-size: 20px;"></i>
+<div style="text-align: right; margin-top: 10px;">
+<div style="font-weight: bold; color: #1a3a3a; font-size: 13px;">بحث مكاني (نطاق)</div>
+<div style="color: #6a8e8e; font-size: 10px; margin-top: 2px;">إيجاد المعالم القريبة من نقطة ضمن مسافة</div>
+</div>
+</div>
 </div>
 </div>
 <!-- SECTION 2: GeoPy Tools (DEDICATED SECTION) -->
@@ -1266,6 +1287,74 @@ def run_tool():
 <div class="mft">
 <button class="btn bg" onclick="closeM('m-buffer')">إلغاء</button>
 <button class="btn bp" onclick="runBuffer()">تنفيذ</button>
+</div>
+</div>
+</div>
+<!-- MODAL: OVERPASS (LIVE OSM DATA) -->
+<div class="ov" id="m-overpass">
+<div class="modal" style="width:460px">
+<div class="mh"><h2 style="font-size:13px"><i class="fa-solid fa-cloud-arrow-down"></i> جلب بيانات OSM حية (Overpass API)</h2><button class="mcl" onclick="closeM('m-overpass')"><i class="fa-solid fa-xmark"></i></button></div>
+<div class="mb">
+<div class="fr"><label>نوع المعالم</label><select class="select-enhanced" id="ovp-type" onchange="document.getElementById('ovp-custom-row').style.display=this.value==='custom'?'grid':'none'">
+<option value="highway">🛣️ الطرق (Roads)</option>
+<option value="building">🏢 المباني (Buildings)</option>
+<option value="amenity">📍 نقاط اهتمام (POI)</option>
+<option value="water">💧 المسطحات المائية</option>
+<option value="green">🌳 المساحات الخضراء</option>
+<option value="custom">⚙️ مخصص (Key=Value)</option>
+</select></div>
+<div class="fg" id="ovp-custom-row" style="display:none">
+<div class="fr"><label>Key</label><input id="ovp-key" placeholder="shop" type="text"/></div>
+<div class="fr"><label>Value (اختياري)</label><input id="ovp-val" placeholder="bakery" type="text"/></div>
+</div>
+<div class="fr"><label>النطاق</label><select class="select-enhanced" id="ovp-scope">
+<option value="view">حدود العرض الحالي للخريطة</option>
+</select></div>
+<div style="padding:8px 10px;background:var(--g5);border:1px solid var(--border2);border-radius:8px;font-size:10px;color:var(--g1)">⚠️ قرّب الخريطة على منطقة صغيرة قبل الجلب لتفادي بطء الاستجابة أو رفض الطلب من الخادم.</div>
+<div class="fr"><label>اسم الطبقة الناتجة</label><input id="ovp-name" placeholder="OSM Data" type="text"/></div>
+<div id="ovp-status" style="font-size:10px;color:var(--text3);text-align:center;padding:4px 0"></div>
+</div>
+<div class="mft">
+<button class="btn bg" onclick="closeM('m-overpass')">إلغاء</button>
+<button class="btn bp" id="ovp-run-btn" onclick="runOverpassQuery()"><i class="fa-solid fa-download"></i> جلب البيانات</button>
+</div>
+</div>
+</div>
+<!-- MODAL: GEOCODING (بحث جغرافي) -->
+<div class="ov" id="m-geocode">
+<div class="modal" style="width:440px">
+<div class="mh"><h2 style="font-size:13px"><i class="fa-solid fa-location-dot"></i> بحث جغرافي — Geocoding</h2><button class="mcl" onclick="closeM('m-geocode')"><i class="fa-solid fa-xmark"></i></button></div>
+<div class="mb">
+<div class="srch-box" style="height:36px"><i class="fa-solid fa-magnifying-glass"></i><input id="geo-search-input" onkeydown="if(event.key==='Enter')runGeocodeSearch()" placeholder="اكتب اسم مكان، مدينة، عنوان..." type="text"/></div>
+<button class="btn bp" style="width:100%;margin-top:8px" onclick="runGeocodeSearch()"><i class="fa-solid fa-magnifying-glass"></i> بحث</button>
+<div id="geo-results" style="margin-top:10px;max-height:280px;overflow-y:auto"></div>
+</div>
+<div class="mft"><button class="btn bg" onclick="closeM('m-geocode')">إغلاق</button></div>
+</div>
+</div>
+<!-- MODAL: SPATIAL SEARCH (بحث مكاني بنطاق) -->
+<div class="ov" id="m-spatial-search">
+<div class="modal" style="width:460px">
+<div class="mh"><h2 style="font-size:13px"><i class="fa-solid fa-magnifying-glass-location"></i> بحث مكاني — ضمن نطاق</h2><button class="mcl" onclick="closeM('m-spatial-search')"><i class="fa-solid fa-xmark"></i></button></div>
+<div class="mb">
+<div class="fr"><label>نقطة المركز</label><div class="btns-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button class="btn" id="ss-pick-btn" onclick="activateSpatialSearchPick()"><i class="fa-solid fa-crosshairs"></i> التقاط من الخريطة</button>
+<button class="btn" onclick="useMapCenterForSearch()"><i class="fa-solid fa-map"></i> مركز الخريطة الحالي</button>
+</div></div>
+<div class="fg">
+<div class="fr"><label>خط العرض</label><input id="ss-lat" step="0.000001" type="number"/></div>
+<div class="fr"><label>خط الطول</label><input id="ss-lng" step="0.000001" type="number"/></div>
+</div>
+<div class="fg">
+<div class="fr"><label>نطاق البحث</label><input id="ss-radius" min="0" step="0.1" type="number" value="1"/></div>
+<div class="fr"><label>الوحدة</label><select class="select-enhanced" id="ss-unit"><option value="kilometers">كيلومتر</option><option value="meters">متر</option></select></div>
+</div>
+<div class="fr"><label>الطبقات المشمولة بالبحث</label><select class="select-enhanced" id="ss-layer-sel"><option value="__all__">كل الطبقات</option></select></div>
+<div id="ss-results" style="margin-top:8px;max-height:220px;overflow-y:auto"></div>
+</div>
+<div class="mft">
+<button class="btn bg" onclick="closeM('m-spatial-search')">إغلاق</button>
+<button class="btn bp" onclick="runSpatialSearch()"><i class="fa-solid fa-magnifying-glass"></i> بحث</button>
 </div>
 </div>
 </div>
@@ -1348,6 +1437,7 @@ let currentProjectId=null,currentProjectName='مشروع جديد',authMode='log
 let pendingFile=null,pendingShp=null,pendingShpFiles={},pendingRasterFile=null;
 let attrFilter='',drawMode=null,drawPoints=[],drawLayerId=null;
 let pickMode=false,mapMode='pan';
+let spatialSearchPickMode=false;
 let drawPolyline=null,drawPolygon=null,drawPreview=null,drawVertexLayer=null;
 let isRendering=false,renderDragging=false,renderStartPoint=null,renderCurrentBBox=null;
 let renderPreviewLayer=null,renderMaskLayer=null,renderInstructionEl=null,renderContainer=null;
@@ -1694,6 +1784,14 @@ map.on('click',e=>{
     openM('m-feat'); pickMode=false;
     map.getContainer().style.cursor='';
     showT('📍 تم التقاط الإحداثيات'); return;
+  }
+  if(spatialSearchPickMode){
+    document.getElementById('ss-lat').value=e.latlng.lat.toFixed(6);
+    document.getElementById('ss-lng').value=e.latlng.lng.toFixed(6);
+    spatialSearchPickMode=false;
+    map.getContainer().style.cursor='';
+    openM('m-spatial-search');
+    showT('📍 تم التقاط نقطة البحث'); return;
   }
   if(drawMode){handleDrawClick(e.latlng);return;}
   if(measurer){handleMeasureClick(e.latlng);return;}
@@ -2646,6 +2744,152 @@ function stopAllTools(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   OVERPASS API — LIVE OSM DATA
+═══════════════════════════════════════════════════════════════ */
+function overpassTagFilter(kind){
+  switch(kind){
+    case 'highway': return '["highway"]';
+    case 'building': return '["building"]';
+    case 'amenity': return '["amenity"]';
+    case 'water': return '["natural"="water"]';
+    case 'green': return '["leisure"~"park|garden"]';
+    case 'custom':{
+      const k=(document.getElementById('ovp-key').value||'').trim();
+      const v=(document.getElementById('ovp-val').value||'').trim();
+      if(!k) return null;
+      return v? `["${k}"="${v}"]` : `["${k}"]`;
+    }
+  }
+  return null;
+}
+function osmElementsToGeoJSON(elements){
+  const nodesById={};
+  elements.forEach(el=>{ if(el.type==='node') nodesById[el.id]={lat:el.lat,lon:el.lon}; });
+  const features=[];
+  elements.forEach(el=>{
+    const tags=el.tags||{};
+    const props={...tags};
+    if(el.type==='node'){
+      props['اسم']=tags.name||tags['name:ar']||'نقطة OSM';
+      features.push({type:'Feature',geometry:{type:'Point',coordinates:[el.lon,el.lat]},properties:props});
+    } else if(el.type==='way'){
+      let coords=null;
+      if(el.geometry) coords=el.geometry.map(p=>[p.lon,p.lat]);
+      else if(el.nodes) coords=el.nodes.map(id=>nodesById[id]).filter(Boolean).map(p=>[p.lon,p.lat]);
+      if(!coords||coords.length<2) return;
+      props['اسم']=tags.name||tags['name:ar']||'معلم OSM';
+      const closed=coords.length>=4 && coords[0][0]===coords[coords.length-1][0] && coords[0][1]===coords[coords.length-1][1];
+      const isAreaTag=tags.building||tags.natural==='water'||tags.leisure||tags.landuse;
+      if(closed && isAreaTag) features.push({type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:props});
+      else features.push({type:'Feature',geometry:{type:'LineString',coordinates:coords},properties:props});
+    }
+  });
+  return {type:'FeatureCollection',features};
+}
+async function runOverpassQuery(){
+  const kind=document.getElementById('ovp-type').value;
+  const filter=overpassTagFilter(kind);
+  const statusEl=document.getElementById('ovp-status');
+  if(!filter){ statusEl.textContent='⚠️ الرجاء إدخال Key صالح للاستعلام المخصص'; return; }
+  const b=map.getBounds();
+  const bbox=`${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
+  const query=`[out:json][timeout:25];(node${filter}(${bbox});way${filter}(${bbox}););out body geom;`;
+  const btn=document.getElementById('ovp-run-btn');
+  btn.disabled=true; statusEl.textContent='⏳ جارٍ الاتصال بخادم Overpass...';
+  try{
+    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query)});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const fc=osmElementsToGeoJSON(data.elements||[]);
+    if(!fc.features.length){ statusEl.textContent='لا توجد نتائج ضمن النطاق الحالي'; btn.disabled=false; return; }
+    const name=(document.getElementById('ovp-name').value||'').trim()||('OSM '+kind);
+    addLayerFromGeoJSON(fc,name,'#0a7ea4',85);
+    statusEl.textContent=`✅ تم إضافة ${fc.features.length} معلم`;
+    showT(`🌐 تم جلب ${fc.features.length} معلم من OSM`);
+    setTimeout(()=>closeM('m-overpass'),700);
+  }catch(err){
+    statusEl.textContent='❌ فشل الاتصال — جرّب نطاقاً أصغر أو حاول لاحقاً ('+err.message+')';
+  }finally{ btn.disabled=false; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GEOCODING (Nominatim)
+═══════════════════════════════════════════════════════════════ */
+async function runGeocodeSearch(){
+  const q=(document.getElementById('geo-search-input').value||'').trim();
+  const resultsEl=document.getElementById('geo-results');
+  if(!q){ resultsEl.innerHTML='<div class="small" style="text-align:center;padding:8px">اكتب نص البحث أولاً</div>'; return; }
+  resultsEl.innerHTML='<div class="small" style="text-align:center;padding:8px">⏳ جارٍ البحث...</div>';
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=8&accept-language=ar&q=${encodeURIComponent(q)}`;
+    const res=await fetch(url,{headers:{'Accept':'application/json'}});
+    const list=await res.json();
+    if(!list.length){ resultsEl.innerHTML='<div class="small" style="text-align:center;padding:8px">لا توجد نتائج</div>'; return; }
+    resultsEl.innerHTML=list.map((r,i)=>`<div class="pm-card" style="cursor:pointer" onclick="flyToGeocodeResult(${i})"><div style="font-weight:700;color:var(--g1);font-size:11px">${(r.display_name||'').split(',')[0]}</div><div class="pm-meta">${r.display_name}</div></div>`).join('');
+    window.__geoResults=list;
+  }catch(err){
+    resultsEl.innerHTML='<div class="small" style="text-align:center;padding:8px;color:#c0392b">❌ فشل البحث</div>';
+  }
+}
+function flyToGeocodeResult(i){
+  const r=(window.__geoResults||[])[i]; if(!r) return;
+  const lat=parseFloat(r.lat), lng=parseFloat(r.lon);
+  map.setView([lat,lng],15);
+  const feat={type:'Feature',geometry:{type:'Point',coordinates:[lng,lat]},properties:{'الاسم':(r.display_name||'').split(',')[0]}};
+  addLayerFromGeoJSON({type:'FeatureCollection',features:[feat]},'نتيجة بحث: '+(r.display_name||'').split(',')[0],'#d4a820',95);
+  closeM('m-geocode');
+  showT('📍 تم الانتقال إلى الموقع');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SPATIAL SEARCH — RADIUS SEARCH ACROSS LAYERS
+═══════════════════════════════════════════════════════════════ */
+function activateSpatialSearchPick(){
+  closeM('m-spatial-search');
+  spatialSearchPickMode=true;
+  map.getContainer().style.cursor='crosshair';
+  showT('🎯 انقر على الخريطة لتحديد نقطة البحث');
+}
+function useMapCenterForSearch(){
+  const c=map.getCenter();
+  document.getElementById('ss-lat').value=c.lat.toFixed(6);
+  document.getElementById('ss-lng').value=c.lng.toFixed(6);
+}
+function runSpatialSearch(){
+  const lat=parseFloat(document.getElementById('ss-lat').value);
+  const lng=parseFloat(document.getElementById('ss-lng').value);
+  const radius=parseFloat(document.getElementById('ss-radius').value)||0;
+  const unit=document.getElementById('ss-unit').value;
+  const layerId=document.getElementById('ss-layer-sel').value;
+  const resultsEl=document.getElementById('ss-results');
+  if(isNaN(lat)||isNaN(lng)){ resultsEl.innerHTML='<div class="small" style="text-align:center;padding:8px">حدّد نقطة المركز أولاً</div>'; return; }
+  if(typeof turf==='undefined'){ resultsEl.innerHTML='<div class="small" style="text-align:center;padding:8px">مكتبة turf غير متاحة</div>'; return; }
+  const center=turf.point([lng,lat]);
+  const radiusKm=unit==='meters'? radius/1000 : radius;
+  const targetLayers=layerId==='__all__'? layers : layers.filter(l=>l.id===layerId);
+  const found=[];
+  targetLayers.forEach(lyr=>{
+    (lyr.features||[]).forEach(f=>{
+      try{
+        const c=turf.centroid(f);
+        const d=turf.distance(center,c,{units:'kilometers'});
+        if(d<=radiusKm) found.push({layer:lyr.name,name:f.properties&&(f.properties['الاسم']||f.properties['اسم']||f.properties.name)||'—',dist:d,geom:c,feat:f});
+      }catch(e){}
+    });
+  });
+  found.sort((a,b)=>a.dist-b.dist);
+  if(!found.length){ resultsEl.innerHTML='<div class="small" style="text-align:center;padding:8px">لا توجد معالم ضمن هذا النطاق</div>'; return; }
+  resultsEl.innerHTML=found.map((r,i)=>`<div class="pm-card" style="cursor:pointer" onclick='zoomToSpatialResult(${i})'><div style="font-weight:700;color:var(--g1);font-size:11px">${r.name}</div><div class="pm-meta">${r.layer} · ${(r.dist).toFixed(3)} كم</div></div>`).join('');
+  window.__spatialSearchResults=found;
+  showT(`🔎 تم العثور على ${found.length} معلم`);
+}
+function zoomToSpatialResult(i){
+  const r=(window.__spatialSearchResults||[])[i]; if(!r) return;
+  const c=r.geom.geometry.coordinates;
+  map.setView([c[1],c[0]],17);
+}
+
+/* ═══════════════════════════════════════════════════════════════
    SPATIAL ANALYSIS TOOLS
 ═══════════════════════════════════════════════════════════════ */
 function getActiveLyr(){return layers.find(l=>l.id===activeId);}
@@ -2925,6 +3169,12 @@ function updateLayerSelects(){
     el.innerHTML='<option value="">— اختر —</option>'+layers.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
     if(cur)el.value=cur;
   });
+  const ssEl=document.getElementById('ss-layer-sel');
+  if(ssEl){
+    const cur=ssEl.value;
+    ssEl.innerHTML='<option value="__all__">كل الطبقات</option>'+layers.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+    if(cur)ssEl.value=cur;
+  }
 }
 
 function updateAllUI(){

@@ -321,6 +321,7 @@ nav.hnav::-webkit-scrollbar{display:none}
 .attr-table tr.hl td{background:rgba(54,179,106,.12)!important;color:var(--g1)!important;font-weight:800}
 
 /* Draw toolbar */
+.draw-sep{width:1px;height:20px;background:var(--border);margin:0 2px}
 #draw-toolbar{
   position:absolute;top:14px;left:50%;transform:translateX(-50%);
   z-index:510;padding:6px 10px;display:none;align-items:center;gap:6px;flex-wrap:wrap;
@@ -534,6 +535,21 @@ nav.hnav::-webkit-scrollbar{display:none}
 .class-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border);border-radius:10px;background:var(--panel2);font-size:11px;margin-top:6px}
 .class-dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.12)}
 
+
+/* Attribute Table Pro */
+.attr-tools{display:flex;align-items:center;gap:4px;flex-wrap:wrap;padding:5px 8px;border-bottom:1px solid var(--border);background:var(--panel2)}
+.attr-tools .da{min-width:28px;height:25px;padding:0 7px;cursor:pointer;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text);font-size:10px}
+.attr-tools .da:hover{background:var(--g1);color:#fff}
+.attr-count{font-size:9px;color:var(--text3);margin-inline-start:auto}
+.attr-table th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+.attr-table th.sortable:hover{background:var(--panel2)}
+.attr-table th .sortmark{font-size:8px;opacity:.7;margin-inline-start:3px}
+.attr-table td.row-check,.attr-table th.row-check{width:28px;text-align:center}
+.attr-table input[type=checkbox]{accent-color:var(--g1);cursor:pointer}
+.attr-pager{display:flex;align-items:center;justify-content:center;gap:5px;padding:5px;border-top:1px solid var(--border);background:var(--panel2);font-size:9px}
+.attr-pager button{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:5px;padding:3px 7px;cursor:pointer}
+.attr-pager button:disabled{opacity:.4;cursor:not-allowed}
+.attr-pager .pg-info{min-width:90px;text-align:center;color:var(--text3)}
 </style>
 <style id="geopy-tab-isolation">
     /* Tab visibility is controlled centrally by switchLeftTab(). */
@@ -674,16 +690,48 @@ nav.hnav::-webkit-scrollbar{display:none}
 <div id="tab-basemap" style="display: none;">
 <div class="sttl">خريطة الخلفية</div>
 <div class="bmg">
-<div class="bmc act" onclick="setBM('osm',this)"><div class="bmt" style="background:linear-gradient(135deg,#edf9ef,#d4f2dc)">🗺️</div><div class="bml">OSM</div></div>
-<div class="bmc" onclick="setBM('googleRoad',this)"><div class="bmt" style="background:linear-gradient(135deg,#eef3ff,#d9e4ff)">📍</div><div class="bml">Google Road</div></div>
-<div class="bmc" onclick="setBM('googleSat',this)"><div class="bmt" style="background:linear-gradient(135deg,#12213b,#22324c)">🛰️</div><div class="bml">Satellite</div></div>
-<div class="bmc" onclick="setBM('googleHybrid',this)"><div class="bmt" style="background:linear-gradient(135deg,#1b2740,#405c7d)">🌐</div><div class="bml">Hybrid</div></div>
-<div class="bmc" onclick="setBM('imagery',this)"><div class="bmt" style="background:linear-gradient(135deg,#12213b,#22324c)">🛰️</div><div class="bml">Esri Imagery</div></div>
-<div class="bmc" onclick="setBM('topo',this)"><div class="bmt" style="background:linear-gradient(135deg,#fff8e0,#f4dcb2)">🏔️</div><div class="bml">World Topo</div></div>
-<div class="bmc" onclick="setBM('streets',this)"><div class="bmt" style="background:linear-gradient(135deg,#f9f9f9,#dedede)">🏙️</div><div class="bml">Streets</div></div>
-<div class="bmc" onclick="setBM('cartoLight',this)"><div class="bmt" style="background:linear-gradient(135deg,#fafafa,#ececec)">🧭</div><div class="bml">Carto Light</div></div>
-<div class="bmc" onclick="setBM('dark',this)"><div class="bmt" style="background:linear-gradient(135deg,#252525,#454545)">🌙</div><div class="bml">Dark Canvas</div></div>
-<div class="bmc" onclick="setBM('natgeo',this)"><div class="bmt" style="background:linear-gradient(135deg,#eff7de,#cfe2a6)">🌿</div><div class="bml">Nat Geo</div></div>
+<div class="bmc act" onclick="setBM('osm',this)"><div class="bmt">🗺️</div><div class="bml">OSM Standard</div></div>
+<div class="bmc" onclick="setBM('hot',this)"><div class="bmt">🆘</div><div class="bml">OSM Humanitarian</div></div>
+<div class="bmc" onclick="setBM('opentopo',this)"><div class="bmt">🏔️</div><div class="bml">OpenTopoMap</div></div>
+<div class="bmc" onclick="setBM('cyclosm',this)"><div class="bmt">🚲</div><div class="bml">CyclOSM</div></div>
+<div class="bmc" onclick="setBM('cartoLight',this)"><div class="bmt">🧭</div><div class="bml">Carto Positron</div></div>
+<div class="bmc" onclick="setBM('cartoDark',this)"><div class="bmt">🌙</div><div class="bml">Carto Dark</div></div>
+<div class="bmc" onclick="setBM('cartoVoyager',this)"><div class="bmt">🌍</div><div class="bml">Carto Voyager</div></div>
+<div class="bmc" onclick="setBM('imagery',this)"><div class="bmt">🛰️</div><div class="bml">Esri Satellite</div></div>
+<div class="bmc" onclick="setBM('topo',this)"><div class="bmt">⛰️</div><div class="bml">Esri Topographic</div></div>
+<div class="bmc" onclick="setBM('streets',this)"><div class="bmt">🏙️</div><div class="bml">Esri Streets</div></div>
+<div class="bmc" onclick="setBM('dark',this)"><div class="bmt">🌑</div><div class="bml">Esri Dark Gray</div></div>
+<div class="bmc" onclick="setBM('natgeo',this)"><div class="bmt">🌿</div><div class="bml">Esri NatGeo</div></div>
+<div class="bmc" onclick="setBM('googleRoad',this)"><div class="bmt">📍</div><div class="bml">Google Road*</div></div>
+<div class="bmc" onclick="setBM('googleSat',this)"><div class="bmt">🌐</div><div class="bml">Google Satellite*</div></div>
+<div class="bmc" onclick="setBM('googleHybrid',this)"><div class="bmt">🛰️</div><div class="bml">Google Hybrid*</div></div>
+</div>
+<div class="small" style="margin-top:6px;line-height:1.6;color:var(--text3)">* خدمات Google هنا للاستخدام التفاعلي فقط وفق شروط مزودها؛ لا تعتمد عليها للتصدير أو الاستخدام التجاري دون التحقق من الترخيص.</div>
+<div class="custom-bm-box" style="margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--panel2,#111827)">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
+    <div class="sttl" style="margin:0;font-size:12px">مدير الخرائط الخارجية</div>
+    <button class="btn" type="button" onclick="toggleCustomBasemapForm()">＋ إضافة خدمة</button>
+  </div>
+  <div id="custom-bm-form" style="display:none">
+    <div class="fr"><label>الاسم</label><input id="cbm-name" class="input" placeholder="مثال: خريطة المحافظة" /></div>
+    <div class="fr"><label>النوع</label><select id="cbm-type" class="select-enhanced" onchange="updateCustomBasemapForm()"><option value="xyz">XYZ / Tile</option><option value="wms">WMS</option><option value="wmts">WMTS REST</option></select></div>
+    <div class="fr"><label>الرابط</label><input id="cbm-url" class="input" placeholder="https://server.example.com/{z}/{x}/{y}.png" /></div>
+    <div id="cbm-wms-fields" style="display:none">
+      <div class="fr"><label>Layers</label><input id="cbm-layers" class="input" placeholder="workspace:layer" /></div>
+      <div class="fr"><label>Format</label><input id="cbm-format" class="input" value="image/png" /></div>
+      <div class="fr"><label>CRS</label><select id="cbm-crs" class="select-enhanced"><option value="EPSG:3857">EPSG:3857</option><option value="EPSG:4326">EPSG:4326</option></select></div>
+      <div class="fr"><label>Styles</label><input id="cbm-styles" class="input" placeholder="اتركه فارغًا إذا لم يوجد" /></div>
+    </div>
+    <div id="cbm-xyz-hint" class="small">استخدم {z}/{x}/{y}، ويمكن استخدام {s} مع نطاقات مثل a,b,c.</div>
+    <div class="fr"><label>Attribution</label><input id="cbm-attrib" class="input" placeholder="© Data Provider" /></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" type="button" onclick="testCustomBasemap()">اختبار</button>
+      <button class="btn primary" type="button" onclick="saveCustomBasemap()">حفظ وإضافة</button>
+      <button class="btn" type="button" onclick="toggleCustomBasemapForm(false)">إلغاء</button>
+    </div>
+  </div>
+  <div id="custom-bm-list" style="margin-top:8px"></div>
+  <div class="small" style="margin-top:6px;line-height:1.5;color:var(--text3)">الخدمات الخارجية تعتمد على الرابط والترخيص وإعدادات الخادم. WMTS هنا بصيغة REST Tile Template؛ خدمات WMTS غير REST قد تحتاج تحويل الرابط إلى قالب البلاطات.</div>
 </div>
 </div>
 <!-- CLASSIFY TAB -->
@@ -828,8 +876,20 @@ def run_tool():
 <button class="dtbtn" id="dt-line" onclick="startDraw('line')"><i class="fa-solid fa-minus"></i> خط</button>
 <button class="dtbtn" id="dt-polygon" onclick="startDraw('polygon')"><i class="fa-solid fa-draw-polygon"></i> مضلع</button>
 <button class="dtbtn" id="dt-rect" onclick="startDraw('rect')"><i class="fa-solid fa-square"></i> مستطيل</button>
+<button class="dtbtn" id="dt-circle" onclick="startDraw('circle')"><i class="fa-regular fa-circle"></i> دائرة</button>
+<span class="draw-sep"></span>
+<button class="dtbtn" onclick="undoDrawVertex()" title="تراجع عن آخر نقطة"><i class="fa-solid fa-rotate-left"></i> تراجع</button>
 <button class="dtbtn" onclick="finishDraw()"><i class="fa-solid fa-check"></i> إنهاء</button>
 <button class="dtbtn" onclick="stopDraw()"><i class="fa-solid fa-ban"></i> إلغاء</button>
+<button class="dtbtn" onclick="startEditSelected()" title="تعديل المعلم المحدد"><i class="fa-solid fa-pen-to-square"></i> تعديل المحدد</button>
+<button class="dtbtn" onclick="addVertexToSelected()" title="إضافة رأس"><i class="fa-solid fa-plus"></i> إضافة رأس</button>
+<button class="dtbtn" onclick="deleteVertexFromSelected()" title="حذف رأس"><i class="fa-solid fa-minus"></i> حذف رأس</button>
+<button class="dtbtn" onclick="toggleSnapMode()" id="dt-snap" title="تفعيل الالتقاط"><i class="fa-solid fa-magnet"></i> Snap</button>
+<button class="dtbtn" onclick="mergeSelectedDrawings()" title="دمج المعالم المحددة"><i class="fa-solid fa-object-group"></i> دمج</button>
+<button class="dtbtn" onclick="splitSelectedLine()" title="تقسيم خط"><i class="fa-solid fa-scissors"></i> تقسيم"</button>
+<button class="dtbtn" onclick="saveEditSession()" title="حفظ التعديل"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+<button class="dtbtn" onclick="cancelEditSession()" title="إلغاء التعديل"><i class="fa-solid fa-arrow-rotate-left"></i> إلغاء التعديل</button>
+<button class="dtbtn" onclick="deleteSelectedDrawing()" style="color:#c0392b" title="حذف المعلم المحدد"><i class="fa-solid fa-trash"></i> حذف</button>
 <button class="dtbtn" onclick="clearDraw()" style="color:#c0392b"><i class="fa-solid fa-eraser"></i> مسح</button>
 <button class="da" onclick="toggleDrawToolbar()"><i class="fa-solid fa-xmark"></i></button>
 </div>
@@ -864,10 +924,19 @@ def run_tool():
 <div class="srch-box" style="height:26px;max-width:160px"><i class="fa-solid fa-filter" style="font-size:9px"></i><input id="attr-search" oninput="filterAttrTable(this.value)" placeholder="فلترة..." type="text"/></div>
 <button class="da" onclick="addAttributeField()" title="إضافة حقل"><i class="fa-solid fa-square-plus"></i></button>
 <button class="da" onclick="addAttributeRecord()" title="إضافة سجل"><i class="fa-solid fa-table-list"></i></button>
-<button class="da" onclick="toggleAttrTable()"><i class="fa-solid fa-xmark"></i></button>
+<button class="da" onclick="toggleAttrTable()" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
 </div>
+</div>
+<div class="attr-tools">
+<button class="da" onclick="selectAllAttrRows()" title="تحديد كل الصفوف"><i class="fa-solid fa-check-double"></i> الكل</button>
+<button class="da" onclick="clearAttrRowsSelection()" title="إلغاء التحديد"><i class="fa-solid fa-square-minus"></i></button>
+<button class="da" onclick="zoomSelectedAttrRows()" title="تكبير على المحدد"><i class="fa-solid fa-magnifying-glass-location"></i></button>
+<button class="da" onclick="deleteSelectedAttrRows()" title="حذف المحدد"><i class="fa-solid fa-trash"></i></button>
+<button class="da" onclick="exportAttrCSV()" title="تصدير CSV"><i class="fa-solid fa-file-csv"></i></button>
+<span class="attr-count" id="attr-count">0 معلم</span>
 </div>
 <div class="attr-body"><table class="attr-table"><thead id="attr-thead"><tr><th>اختر طبقة لعرض بياناتها</th></tr></thead><tbody id="attr-tbody"></tbody></table></div>
+<div class="attr-pager" id="attr-pager" style="display:none"><button id="attr-prev" onclick="attrPage(-1)">السابق</button><span class="pg-info" id="attr-page-info"></span><button id="attr-next" onclick="attrPage(1)">التالي</button></div>
 </div>
 <!-- FEATURE INFO FLOAT -->
 <div class="float-panel" id="feat-info-float">
@@ -1171,6 +1240,10 @@ def run_tool():
 <div style="color: #6a8e8e; font-size: 10px; margin-top: 2px;">منطقة عازلة حول المعالم</div>
 </div>
 </div>
+<div class="tool-card" onclick="openSpatialToolbox()" style="background:#fff;border:1px solid #d1e3e3;border-radius:12px;padding:15px;display:flex;flex-direction:column;align-items:flex-end;gap:5px;cursor:pointer;grid-column:1/-1">
+<i class="fa-solid fa-gears" style="color:#2c5e5e;font-size:20px;"></i>
+<div style="text-align:right;margin-top:10px;width:100%"><div style="font-weight:bold;color:#1a3a3a;font-size:13px">صندوق التحليل المكاني المتقدم</div><div style="color:#6a8e8e;font-size:10px;margin-top:2px">Buffer • Clip • Intersect • Union • Difference • Dissolve • Spatial Join • Distance</div></div>
+</div>
 <div class="tool-card" onclick="measureArea()" style="background: #fff; border: 1px solid #d1e3e3; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; cursor: pointer;">
 <i class="fa-solid fa-vector-square" style="color: #2c5e5e; font-size: 20px;"></i>
 <div style="text-align: right; margin-top: 10px;">
@@ -1309,6 +1382,42 @@ def run_tool():
 <button class="btn bg" onclick="closeM('m-buffer')">إلغاء</button>
 <button class="btn bp" onclick="runBuffer()">تنفيذ</button>
 </div>
+</div>
+</div>
+<!-- MODAL: ADVANCED SPATIAL TOOLBOX -->
+<div class="ov" id="m-spatial-toolbox">
+<div class="modal" style="width:720px;max-width:94vw">
+<div class="mh"><h2 style="font-size:13px"><i class="fa-solid fa-gears"></i> صندوق التحليل المكاني المتقدم</h2><button class="mcl" onclick="closeM('m-spatial-toolbox')"><i class="fa-solid fa-xmark"></i></button></div>
+<div class="mb" style="max-height:68vh;overflow:auto">
+<div class="fg">
+<div class="fr"><label>العملية</label><select class="select-enhanced" id="sa-op" onchange="updateSpatialToolUI()">
+<option value="buffer">Buffer — منطقة عازلة</option>
+<option value="clip">Clip — قص</option>
+<option value="intersect">Intersect — تقاطع</option>
+<option value="union">Union — اتحاد</option>
+<option value="difference">Difference — طرح</option>
+<option value="dissolve">Dissolve — دمج حسب حقل</option>
+<option value="merge">Merge — دمج طبقات</option>
+<option value="centroid">Centroid — مراكز</option>
+<option value="convex">Convex Hull — غلاف محدب</option>
+<option value="nearest">Nearest — أقرب معلم</option>
+<option value="distance">Distance Matrix — مصفوفة مسافات</option>
+<option value="pointinpoly">Point in Polygon — النقاط داخل المضلعات</option>
+<option value="spatialjoin">Spatial Join — ربط مكاني</option>
+</select></div>
+<div class="fr"><label>الطبقة الأساسية</label><select class="select-enhanced" id="sa-layer-a"><option value="">— اختر —</option></select></div>
+<div class="fr" id="sa-layer-b-wrap"><label>الطبقة الثانية</label><select class="select-enhanced" id="sa-layer-b"><option value="">— اختر —</option></select></div>
+</div>
+<div class="fg" id="sa-params">
+<div class="fr" id="sa-distance-wrap"><label>المسافة</label><input id="sa-distance" type="number" min="0" step="0.1" value="1"></div>
+<div class="fr" id="sa-unit-wrap"><label>الوحدة</label><select class="select-enhanced" id="sa-unit"><option value="kilometers">كيلومتر</option><option value="meters">متر</option><option value="miles">ميل</option></select></div>
+<div class="fr" id="sa-field-wrap"><label>حقل Dissolve (اختياري)</label><select class="select-enhanced" id="sa-field"><option value="">بدون حقل</option></select></div>
+</div>
+<div class="fr"><label>اسم الطبقة الناتجة</label><input id="sa-name" type="text" placeholder="Spatial Analysis Result"></div>
+<div id="sa-status" class="small" style="margin-top:10px;padding:9px;border:1px solid #d9e4e4;border-radius:8px;background:#f8fbfb">اختر العملية والطبقات ثم اضغط تنفيذ.</div>
+<div class="small" style="margin-top:8px;color:var(--text3)">ملاحظة: العمليات المكانية تُنفذ محلياً داخل المتصفح باستخدام Turf.js، ولا تحتاج إلى رفع بياناتك إلى خادم.</div>
+</div>
+<div class="mft"><button class="btn bg" onclick="closeM('m-spatial-toolbox')">إلغاء</button><button class="btn bp" id="sa-run" onclick="runSpatialAnalysis()">تنفيذ العملية</button></div>
 </div>
 </div>
 <!-- MODAL: OVERPASS (LIVE OSM DATA) -->
@@ -1764,17 +1873,30 @@ function createOSMLayer(){
   return layer;
 }
 
+const ATTR={
+  osm:'© OpenStreetMap contributors',
+  hot:'© OpenStreetMap contributors · HOT',
+  opentopo:'© OpenStreetMap contributors · SRTM | Map style © OpenTopoMap (CC-BY-SA)',
+  cyclosm:'© OpenStreetMap contributors · CyclOSM',
+  carto:'© OpenStreetMap contributors © CARTO',
+  esri:'Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+};
 const TILES={
   osm:createOSMLayer(),
-  imagery:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}),
-  topo:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}),
-  streets:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}),
-  dark:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16}),
-  natgeo:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:16}),
-  googleRoad:L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}),
-  googleSat:L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}),
-  googleHybrid:L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20}),
-  cartoLight:L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20}),
+  hot:L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{subdomains:['a','b','c'],maxZoom:20,attribution:ATTR.hot}),
+  opentopo:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{subdomains:['a','b','c'],maxZoom:17,attribution:ATTR.opentopo}),
+  cyclosm:L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',{subdomains:['a','b','c'],maxZoom:20,attribution:ATTR.cyclosm}),
+  imagery:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:ATTR.esri}),
+  topo:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:ATTR.esri}),
+  streets:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:ATTR.esri}),
+  dark:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:ATTR.esri}),
+  natgeo:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:ATTR.esri}),
+  cartoLight:L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:ATTR.carto}),
+  cartoDark:L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:ATTR.carto}),
+  cartoVoyager:L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:ATTR.carto}),
+  googleRoad:L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20,attribution:'Google'}),
+  googleSat:L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20,attribution:'Google'}),
+  googleHybrid:L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{subdomains:['mt0','mt1','mt2','mt3'],maxZoom:20,attribution:'Google'})
 };
 const map=L.map('m2d',{zoomControl:false,center:[27,34],zoom:7,preferCanvas:true});
 TILES.osm.addTo(map);
@@ -1818,7 +1940,11 @@ map.on('click',e=>{
   if(measurer){handleMeasureClick(e.latlng);return;}
 });
 map.on('dblclick',e=>{if(drawMode)L.DomEvent.stop(e);});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){clearFeatureSelection();showT('↩️ تم مسح التحديد');}});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if(editSession){cancelEditSession();return;}if(drawMode){stopDraw();showT('↩️ تم إلغاء الرسم');return;}clearFeatureSelection();showT('↩️ تم مسح التحديد');}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&drawMode){e.preventDefault();undoDrawVertex();}
+  if(e.key==='Enter'&&drawMode&&drawMode!=='point'){e.preventDefault();finishDraw();}
+});
 
 /* ═══════════════════════════════════════════════════════════════
    LAYER UTILS
@@ -2470,28 +2596,84 @@ function deleteRaster(id){const idx=rasterLayers.findIndex(x=>x.id===id);if(idx=
 /* ═══════════════════════════════════════════════════════════════
    ATTRIBUTE TABLE
 ═══════════════════════════════════════════════════════════════ */
+let attrSortKey='';
+let attrSortDir=1;
+let attrPageIndex=0;
+const ATTR_PAGE_SIZE=150;
+function toggleAttrRow(lyrId,idx,checked){
+  const lyr=layers.find(l=>l.id===lyrId); if(!lyr) return;
+  const key=getSelectionKey(lyrId,idx);
+  const at=selectedFeatures.findIndex(x=>x.key===key);
+  if(checked && at<0) selectedFeatures.push({key,lyrId,idx,feat:lyr.features[idx]});
+  if(!checked && at>=0) selectedFeatures.splice(at,1);
+  updateFeatureSelectionStyles();
+  renderAttrTable(lyr);
+}
+function selectAllAttrRows(){
+  const lyr=layers.find(l=>l.id===activeId)||layers[0]; if(!lyr) return showT('⚠️ لا توجد طبقة');
+  const term=(attrFilter||'').toLowerCase();
+  lyr.features.forEach((f,idx)=>{
+    if(term && !JSON.stringify(f.properties||{}).toLowerCase().includes(term)) return;
+    const key=getSelectionKey(lyr.id,idx);
+    if(!selectedFeatures.some(x=>x.key===key)) selectedFeatures.push({key,lyrId:lyr.id,idx,feat:f});
+  });
+  updateFeatureSelectionStyles(); renderAttrTable(lyr); showT(`✓ تم تحديد ${selectedFeatures.length} معلم`);
+}
+function clearAttrRowsSelection(){clearFeatureSelection(true); showT('✓ تم إلغاء التحديد');}
+function zoomSelectedAttrRows(){
+  const items=selectedFeatures.filter(x=>layers.some(l=>l.id===x.lyrId));
+  if(!items.length) return showT('⚠️ حدد معلمًا أولاً');
+  const pts=[]; items.forEach(x=>{const f=x.feat; if(f?.geometry?.type==='Point') pts.push([f.geometry.coordinates[1],f.geometry.coordinates[0]]); else {const lyr=layers.find(l=>l.id===x.lyrId); lyr?.leafletLayer?.eachLayer(ll=>{if(ll.feature===f){try{pts.push(ll.getBounds().getSouthWest());pts.push(ll.getBounds().getNorthEast());}catch(e){}}});}});
+  if(pts.length){try{map.fitBounds(L.latLngBounds(pts).pad(.15));}catch(e){}}
+}
+function deleteSelectedAttrRows(){
+  const byLayer={}; selectedFeatures.forEach(x=>(byLayer[x.lyrId]??=[]).push(x.idx));
+  let n=0; Object.entries(byLayer).forEach(([lid,idxs])=>{const lyr=layers.find(l=>l.id===lid); if(!lyr)return; const set=new Set(idxs); const before=lyr.features.length; lyr.features=lyr.features.filter((f,i)=>!set.has(i)); n+=before-lyr.features.length; refreshLayerOnMap(lyr);});
+  selectedFeatures.length=0; if(n){updateAllUI(); const lyr=layers.find(l=>l.id===activeId)||layers[0]; if(lyr)renderAttrTable(lyr); showT(`🗑️ تم حذف ${n} معلم`);} else showT('⚠️ لا يوجد تحديد للحذف');
+}
+function sortAttrTable(key){
+  if(attrSortKey===key) attrSortDir*=-1; else {attrSortKey=key;attrSortDir=1;}
+  attrPageIndex=0; const lyr=layers.find(l=>l.id===activeId)||layers[0]; if(lyr)renderAttrTable(lyr);
+}
+function attrPage(delta){
+  const lyr=layers.find(l=>l.id===activeId)||layers[0]; if(!lyr)return;
+  const term=(attrFilter||'').toLowerCase(); const count=lyr.features.filter(f=>!term||JSON.stringify(f.properties||{}).toLowerCase().includes(term)).length;
+  const max=Math.max(0,Math.ceil(count/ATTR_PAGE_SIZE)-1); attrPageIndex=Math.max(0,Math.min(max,attrPageIndex+delta)); renderAttrTable(lyr);
+}
+function exportAttrCSV(){
+  const lyr=layers.find(l=>l.id===activeId)||layers[0]; if(!lyr)return showT('⚠️ لا توجد طبقة');
+  const keys=[...new Set(lyr.features.flatMap(f=>Object.keys(f.properties||{})))];
+  const esc=v=>`"${String(v??'').replace(/"/g,'""')}`;
+  const rows=[['#',...keys],...lyr.features.map((f,i)=>[i+1,...keys.map(k=>f.properties?.[k]??'')])];
+  const csv='\uFEFF'+rows.map(r=>r.map(esc).join(',')).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=(lyr.name||'layer').replace(/[^\w\u0600-\u06FF.-]+/g,'_')+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showT('✓ تم تصدير CSV');
+}
+
 function renderAttrTable(lyr,hlIdx=-1){
   const thead=document.getElementById('attr-thead'),tbody=document.getElementById('attr-tbody');
-  if(!lyr){thead.innerHTML='<tr><th>لا توجد طبقة</th></tr>';tbody.innerHTML='';return;}
-  /* Carry each feature's original index alongside it (O(n)) instead of
-     re-searching for it with indexOf per row (O(n) per row = O(n²) total). */
+  if(!lyr){thead.innerHTML='<tr><th>لا توجد طبقة</th></tr>';tbody.innerHTML='';document.getElementById('attr-count').textContent='0 معلم';document.getElementById('attr-pager').style.display='none';return;}
   const term=(attrFilter||'').toLowerCase();
-  const indexed=lyr.features.map((f,oi)=>({f,oi}));
-  const rows=term?indexed.filter(r=>JSON.stringify(r.f.properties||{}).toLowerCase().includes(term)):indexed;
-  const keys=[...new Set(rows.flatMap(r=>Object.keys(r.f.properties||{})))];
+  let indexed=lyr.features.map((f,oi)=>({f,oi}));
+  if(term) indexed=indexed.filter(r=>JSON.stringify(r.f.properties||{}).toLowerCase().includes(term));
+  const keys=[...new Set(indexed.flatMap(r=>Object.keys(r.f.properties||{})))];
+  if(attrSortKey && keys.includes(attrSortKey)){indexed.sort((a,b)=>{const av=a.f.properties?.[attrSortKey],bv=b.f.properties?.[attrSortKey]; const an=Number(av),bn=Number(bv); let c=Number.isFinite(an)&&Number.isFinite(bn)?an-bn:String(av??'').localeCompare(String(bv??''),'ar',{numeric:true,sensitivity:'base'}); return c*attrSortDir;});}
+  const total=indexed.length; const pages=Math.max(1,Math.ceil(total/ATTR_PAGE_SIZE)); attrPageIndex=Math.min(attrPageIndex,pages-1);
+  const pageRows=indexed.slice(attrPageIndex*ATTR_PAGE_SIZE,(attrPageIndex+1)*ATTR_PAGE_SIZE);
   document.getElementById('attr-title').innerHTML=`<i class="fa-solid fa-table"></i> ${lyr.name}`;
-  thead.innerHTML='<tr><th>#</th>'+keys.map(k=>`<th>${k}</th>`).join('')+'</tr>';
-  tbody.innerHTML=rows.map(({f,oi})=>{
-    const isSelected=!!getSelectedEntry(lyr.id,oi);
-    const cls=`${oi===hlIdx?'hl ':''}${isSelected?'sel multi':''}`.trim();
-    return `<tr class="${cls}" onclick="zoomToFeat('${lyr.id}',${oi},event)"><td>${oi+1}</td>${keys.map(k=>`<td ondblclick="editCell('${lyr.id}',${oi},'${k.replace(/'/g,"\\'")}');event.stopPropagation()">${(f.properties||{})[k]??''}</td>`).join('')}</tr>`;
-  }).join('');
+  document.getElementById('attr-count').textContent=`${total.toLocaleString('ar-EG')} معلم${selectedFeatures.length?' • '+selectedFeatures.length+' محدد':''}`;
+  thead.innerHTML='<tr><th class="row-check"><input type="checkbox" title="تحديد الصفحة" onchange="toggleAttrPage(this.checked)"></th><th>#</th>'+keys.map(k=>`<th class="sortable" onclick="sortAttrTable(${JSON.stringify(k)})">${k}<span class="sortmark">${attrSortKey===k?(attrSortDir===1?'▲':'▼'):'↕'}</span></th>`).join('')+'</tr>';
+  tbody.innerHTML=pageRows.map(({f,oi})=>{
+    const isSelected=!!getSelectedEntry(lyr.id,oi); const cls=`${oi===hlIdx?'hl ':''}${isSelected?'sel multi':''}`.trim();
+    return `<tr class="${cls}" onclick="zoomToFeat('${lyr.id}',${oi},event)"><td class="row-check" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected?'checked':''} onchange="toggleAttrRow('${lyr.id}',${oi},this.checked)"></td><td>${oi+1}</td>${keys.map(k=>`<td ondblclick="editCell('${lyr.id}',${oi},${JSON.stringify(k)});event.stopPropagation()">${String((f.properties||{})[k]??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</td>`).join('')}</tr>`;
+  }).join('') || `<tr><td colspan="${keys.length+2}" style="text-align:center;padding:18px">لا توجد نتائج</td></tr>`;
+  const pager=document.getElementById('attr-pager'); pager.style.display=pages>1?'flex':'none'; document.getElementById('attr-page-info').textContent=`صفحة ${attrPageIndex+1} / ${pages}`; document.getElementById('attr-prev').disabled=attrPageIndex<=0; document.getElementById('attr-next').disabled=attrPageIndex>=pages-1;
   document.getElementById('attr-layer-sel').value=lyr.id;
   if(hlIdx>-1)setTimeout(()=>{const hl=tbody.querySelector('.hl');if(hl)hl.scrollIntoView({block:'center'});},80);
 }
-
-function filterAttrTable(term){attrFilter=term.trim();const lyr=layers.find(l=>l.id===activeId)||layers[0];renderAttrTable(lyr);}
-function switchAttrLayer(id){const lyr=layers.find(l=>l.id===id);if(lyr){activeId=id;renderAttrTable(lyr);updateLyrList();}}
+function toggleAttrPage(checked){
+  const lyr=layers.find(l=>l.id===activeId)||layers[0]; if(!lyr)return; const term=(attrFilter||'').toLowerCase(); let rows=lyr.features.map((f,oi)=>({f,oi})); if(term)rows=rows.filter(r=>JSON.stringify(r.f.properties||{}).toLowerCase().includes(term)); rows=rows.slice(attrPageIndex*ATTR_PAGE_SIZE,(attrPageIndex+1)*ATTR_PAGE_SIZE); rows.forEach(({f,oi})=>{const key=getSelectionKey(lyr.id,oi),at=selectedFeatures.findIndex(x=>x.key===key); if(checked&&at<0)selectedFeatures.push({key,lyrId:lyr.id,idx:oi,feat:f}); if(!checked&&at>=0)selectedFeatures.splice(at,1);}); updateFeatureSelectionStyles();renderAttrTable(lyr);}
+function filterAttrTable(term){attrFilter=term.trim();attrPageIndex=0;const lyr=layers.find(l=>l.id===activeId)||layers[0];renderAttrTable(lyr);}
+function switchAttrLayer(id){const lyr=layers.find(l=>l.id===id);if(lyr){activeId=id;attrPageIndex=0;attrSortKey='';renderAttrTable(lyr);updateLyrList();}}
 function toggleAttrTable(){
   const p=document.getElementById('attr-panel');
   const show=p.style.display!=='flex';
@@ -2829,44 +3011,213 @@ function focusActiveLayer(){const lyr=layers.find(l=>l.id===activeId);if(!lyr||!
 /* ═══════════════════════════════════════════════════════════════
    DRAW TOOLS
 ═══════════════════════════════════════════════════════════════ */
-function toggleDrawToolbar(){const t=document.getElementById('draw-toolbar');t.classList.toggle('show');if(!t.classList.contains('show'))stopDraw();}
-function startDraw(mode){stopDraw();drawMode=mode;drawPoints=[];document.querySelectorAll('.dtbtn').forEach(b=>b.classList.remove('on'));document.getElementById('dt-'+mode)?.classList.add('on');map.getContainer().style.cursor='crosshair';if(map.doubleClickZoom)map.doubleClickZoom.disable();showT(`✏️ انقر لإضافة نقاط الـ ${mode}`);}
-function stopDraw(){drawMode=null;drawPoints=[];clearDrawPrev();if(map.doubleClickZoom)map.doubleClickZoom.enable();map.getContainer().style.cursor='';document.querySelectorAll('.dtbtn').forEach(b=>b.classList.remove('on'));}
-function clearDrawPrev(){if(drawPolyline){map.removeLayer(drawPolyline);drawPolyline=null;}if(drawPolygon){map.removeLayer(drawPolygon);drawPolygon=null;}if(drawPreview){map.removeLayer(drawPreview);drawPreview=null;}if(drawVertexLayer)drawVertexLayer.clearLayers();}
-function clearDraw(){clearDrawPrev();drawPoints=[];stopDraw();}
+function toggleDrawToolbar(){
+  const t=document.getElementById('draw-toolbar');
+  const willShow=!t.classList.contains('show');
+  t.classList.toggle('show',willShow);
+  if(!willShow){stopDraw();cancelEditSession();}
+  else showT('✏️ اختر أداة الرسم ثم انقر على الخريطة');
+}
+
+let drawInteractionSnapshot=null;
+let editSession=null;
+
+function snapshotMapInteractions(){
+  return {
+    dragging:!!map.dragging?.enabled(),
+    doubleClickZoom:!!map.doubleClickZoom?.enabled(),
+    boxZoom:!!map.boxZoom?.enabled(),
+    scrollWheelZoom:!!map.scrollWheelZoom?.enabled(),
+    keyboard:!!map.keyboard?.enabled(),
+    touchZoom:!!map.touchZoom?.enabled()
+  };
+}
+function restoreMapInteractions(s){
+  if(!s)return;
+  const set=(obj,on)=>{if(!obj)return; try{on?obj.enable():obj.disable();}catch(e){}};
+  set(map.dragging,s.dragging); set(map.doubleClickZoom,s.doubleClickZoom); set(map.boxZoom,s.boxZoom);
+  set(map.scrollWheelZoom,s.scrollWheelZoom); set(map.keyboard,s.keyboard); set(map.touchZoom,s.touchZoom);
+  drawInteractionSnapshot=null;
+}
+function lockMapForDrawing(){
+  drawInteractionSnapshot=snapshotMapInteractions();
+  try{map.dragging.disable();}catch(e){}
+  try{map.doubleClickZoom.disable();}catch(e){}
+  try{map.boxZoom.disable();}catch(e){}
+  try{map.keyboard.disable();}catch(e){}
+}
+function startDraw(mode){
+  cancelEditSession();
+  stopDraw();
+  drawMode=mode; drawPoints=[];
+  document.querySelectorAll('#draw-toolbar .dtbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('dt-'+mode)?.classList.add('on');
+  lockMapForDrawing();
+  map.getContainer().style.cursor='crosshair';
+  const hints={point:'انقر مرة واحدة لإنشاء نقطة',line:'انقر لإضافة الرؤوس ثم اضغط إنهاء أو Enter',polygon:'انقر لإضافة الرؤوس ثم اضغط إنهاء أو Enter',rect:'انقر على زاويتين متقابلتين',circle:'انقر على المركز ثم نقطة تحدد نصف القطر'};
+  showT('✏️ '+(hints[mode]||'ابدأ الرسم'));
+}
+function stopDraw(){
+  drawMode=null; drawPoints=[]; clearDrawPrev();
+  document.querySelectorAll('#draw-toolbar .dtbtn').forEach(b=>b.classList.remove('on'));
+  map.getContainer().style.cursor='';
+  restoreMapInteractions(drawInteractionSnapshot);
+}
+function clearDrawPrev(){
+  [drawPolyline,drawPolygon,drawPreview].forEach(l=>{if(l&&map.hasLayer(l))map.removeLayer(l);});
+  drawPolyline=drawPolygon=drawPreview=null;
+  if(drawVertexLayer)drawVertexLayer.clearLayers();
+}
+function clearDraw(){stopDraw();cancelEditSession();showT('🧹 تم مسح حالة الرسم الحالية');}
+function undoDrawVertex(){
+  if(!drawMode)return showT('⚠️ لا توجد عملية رسم نشطة');
+  if(drawMode==='point')return stopDraw();
+  if(drawPoints.length){drawPoints.pop();updateDrawPreview();showT(`↩️ تم التراجع — بقي ${drawPoints.length} نقطة`);}
+  else showT('ℹ️ لا توجد نقطة للتراجع');
+}
 function updateDrawPreview(ll=null){
   clearDrawPrev();
   const col=getActColor();
-  if(drawVertexLayer)drawPoints.forEach((p,i)=>L.circleMarker(p,{radius:4,color:col,fillColor:'#fff',fillOpacity:1,weight:2}).bindTooltip(''+(i+1)).addTo(drawVertexLayer));
-  if(drawMode==='line'&&drawPoints.length){const pts=ll?[...drawPoints,ll]:[...drawPoints];drawPolyline=L.polyline(pts,{color:col,weight:3}).addTo(map);}
-  if(drawMode==='polygon'&&drawPoints.length){const pts=ll?[...drawPoints,ll]:[...drawPoints];if(pts.length>=2)drawPolygon=L.polygon(pts,{color:col,weight:3,fillOpacity:.15}).addTo(map);}
-  if(drawMode==='rect'&&drawPoints.length===1&&ll){const[a,b]=[drawPoints[0],ll];const pts=[[a.lat,a.lng],[a.lat,b.lng],[b.lat,b.lng],[b.lat,a.lng]];drawPolygon=L.polygon(pts,{color:col,weight:3,fillOpacity:.15}).addTo(map);}
+  drawPoints.forEach((p,i)=>L.circleMarker(p,{radius:5,color:col,fillColor:'#fff',fillOpacity:1,weight:2}).bindTooltip(String(i+1),{permanent:false}).addTo(drawVertexLayer));
+  const pts=ll?[...drawPoints,ll]:[...drawPoints];
+  if(drawMode==='line'&&pts.length>=1)drawPolyline=L.polyline(pts,{color:col,weight:4,dashArray:'7 5',opacity:.9}).addTo(map);
+  if(drawMode==='polygon'&&pts.length>=2)drawPolygon=L.polygon(pts,{color:col,weight:3,dashArray:'7 5',fillColor:col,fillOpacity:.14}).addTo(map);
+  if(drawMode==='rect'&&drawPoints.length===1&&ll){
+    const a=drawPoints[0],b=ll;
+    drawPolygon=L.rectangle(L.latLngBounds(a,b),{color:col,weight:3,dashArray:'7 5',fillColor:col,fillOpacity:.14}).addTo(map);
+  }
+  if(drawMode==='circle'&&drawPoints.length===1&&ll){
+    const r=map.distance(drawPoints[0],ll);
+    drawPreview=L.circle(drawPoints[0],{radius:r,color:col,weight:3,dashArray:'7 5',fillColor:col,fillOpacity:.12}).addTo(map);
+  }
 }
 function handleDrawClick(ll){
-  if(drawMode==='point'){const feat={type:'Feature',geometry:{type:'Point',coordinates:[ll.lng,ll.lat]},properties:{الاسم:'نقطة مرسومة',x:ll.lng.toFixed(5),y:ll.lat.toFixed(5)}};addDrawnFeat(feat);return;}
-  drawPoints.push(ll);updateDrawPreview();
+  if(!drawMode)return;
+  if(drawMode==='point'){
+    addDrawnFeat({type:'Feature',geometry:{type:'Point',coordinates:[ll.lng,ll.lat]},properties:{الاسم:'نقطة مرسومة',x:Number(ll.lng.toFixed(6)),y:Number(ll.lat.toFixed(6))}});
+    stopDraw(); return;
+  }
+  if(drawMode==='circle'&&drawPoints.length===1){drawPoints.push(ll);finishDraw();return;}
+  drawPoints.push(ll); updateDrawPreview();
   if(drawMode==='rect'&&drawPoints.length===2)finishDraw();
+}
+function circleToPolygon(center,radius,steps=72){
+  const coords=[];
+  for(let i=0;i<=steps;i++){
+    const bearing=i*(360/steps);
+    if(typeof turf!=='undefined'&&turf.destination){
+      const p=turf.destination([center.lng,center.lat],radius/1000,bearing,{units:'kilometers'});
+      coords.push(p.geometry.coordinates);
+    }else{
+      const rad=bearing*Math.PI/180, d=radius/111320;
+      coords.push([center.lng+(d*Math.sin(rad))/Math.max(.15,Math.cos(center.lat*Math.PI/180)),center.lat+d*Math.cos(rad)]);
+    }
+  }
+  return coords;
 }
 function finishDraw(){
   if(!drawMode)return;
   let feat=null;
-  if(drawMode==='line'){if(drawPoints.length<2)return showT('⚠️ الخط يحتاج نقطتين');feat={type:'Feature',geometry:{type:'LineString',coordinates:drawPoints.map(p=>[p.lng,p.lat])},properties:{الاسم:'خط مرسوم',عدد_النقاط:drawPoints.length}};}
-  else if(drawMode==='polygon'){if(drawPoints.length<3)return showT('⚠️ المضلع يحتاج 3 نقاط');const coords=drawPoints.map(p=>[p.lng,p.lat]);coords.push(coords[0]);feat={type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{الاسم:'مضلع مرسوم',عدد_النقاط:drawPoints.length}};}
-  else if(drawMode==='rect'){if(drawPoints.length!==2)return;const[a,b]=drawPoints;feat={type:'Feature',geometry:{type:'Polygon',coordinates:[[[a.lng,a.lat],[b.lng,a.lat],[b.lng,b.lat],[a.lng,b.lat],[a.lng,a.lat]]]},properties:{الاسم:'مستطيل مرسوم'}};}
-  if(feat)addDrawnFeat(feat);stopDraw();
+  if(drawMode==='line'){
+    if(drawPoints.length<2)return showT('⚠️ الخط يحتاج نقطتين على الأقل');
+    feat={type:'Feature',geometry:{type:'LineString',coordinates:drawPoints.map(p=>[p.lng,p.lat])},properties:{الاسم:'خط مرسوم',عدد_النقاط:drawPoints.length}};
+  }else if(drawMode==='polygon'){
+    if(drawPoints.length<3)return showT('⚠️ المضلع يحتاج 3 نقاط على الأقل');
+    const coords=drawPoints.map(p=>[p.lng,p.lat]);coords.push(coords[0]);
+    feat={type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{الاسم:'مضلع مرسوم',عدد_النقاط:drawPoints.length}};
+  }else if(drawMode==='rect'){
+    if(drawPoints.length!==2)return showT('⚠️ حدد زاويتين متقابلتين للمستطيل');
+    const[a,b]=drawPoints; feat={type:'Feature',geometry:{type:'Polygon',coordinates:[[[a.lng,a.lat],[b.lng,a.lat],[b.lng,b.lat],[a.lng,b.lat],[a.lng,a.lat]]]},properties:{الاسم:'مستطيل مرسوم'}};
+  }else if(drawMode==='circle'){
+    if(drawPoints.length!==2)return showT('⚠️ حدد مركز الدائرة ونصف قطرها');
+    const center=drawPoints[0],radius=map.distance(center,drawPoints[1]);
+    feat={type:'Feature',geometry:{type:'Polygon',coordinates:[circleToPolygon(center,radius)]},properties:{الاسم:'دائرة مرسومة',نصف_القطر_م:Math.round(radius)}};
+  }
+  if(feat){addDrawnFeat(feat);showT('✅ تم إنشاء المعلم وحفظه في طبقة الرسم');}
+  stopDraw();
 }
 function addDrawnFeat(feat){
+  feat.properties=feat.properties||{};
   if(typeof turf!=='undefined'){
     const gt=feat.geometry?.type||'';
-    if(gt.includes('Polygon'))feat.properties['المساحة_km2']=(turf.area(feat)/1e6).toFixed(4);
-    if(gt.includes('Line')||gt.includes('String'))feat.properties['الطول_km']=turf.length(feat,{units:'kilometers'}).toFixed(4);
+    if(gt.includes('Polygon')){try{feat.properties['المساحة_km2']=Number(turf.area(feat)/1e6).toFixed(4);}catch(e){}}
+    if(gt.includes('Line')||gt.includes('String')){try{feat.properties['الطول_km']=Number(turf.length(feat,{units:'kilometers'})).toFixed(4);}catch(e){}}
   }
   let lyr=drawLayerId?layers.find(l=>l.id===drawLayerId):null;
-  if(!lyr){lyr=createEmptyLayer('طبقة الرسم',getActColor());drawLayerId=lyr.id;lyr.lineWeight=3;}
-  lyr.features.push(feat);
-  refreshLayerOnMap(lyr); activeId=lyr.id; updateAllUI();
-  showT('✅ تمت إضافة المعلم');
+  if(!lyr||!layers.includes(lyr)){lyr=createEmptyLayer('طبقة الرسم',getActColor());drawLayerId=lyr.id;lyr.lineWeight=3;}
+  lyr.features.push(feat); refreshLayerOnMap(lyr); activeId=lyr.id; updateAllUI();
 }
+
+function findLeafletFeatureLayer(lyr,feat){
+  let found=null; lyr?.leafletLayer?.eachLayer(l=>{if(l.feature===feat)found=l;}); return found;
+}
+function featureCoordsForEdit(feat){
+  const g=feat?.geometry;if(!g)return [];
+  if(g.type==='Point')return [[g.coordinates[0],g.coordinates[1]]];
+  if(g.type==='LineString')return g.coordinates.map(c=>[c[0],c[1]]);
+  if(g.type==='Polygon')return (g.coordinates?.[0]||[]).slice(0,-1).map(c=>[c[0],c[1]]);
+  return [];
+}
+function applyEditGeometry(feat,coords){
+  const g=feat.geometry;if(!g)return;
+  if(g.type==='Point')g.coordinates=[coords[0][0],coords[0][1]];
+  else if(g.type==='LineString')g.coordinates=coords.map(c=>[c[0],c[1]]);
+  else if(g.type==='Polygon'){const ring=coords.map(c=>[c[0],c[1]]);if(ring.length)ring.push([...ring[0]]);g.coordinates=[ring];}
+  if(typeof turf!=='undefined'){
+    try{if(g.type==='Polygon')feat.properties['المساحة_km2']=Number(turf.area(feat)/1e6).toFixed(4);}catch(e){}
+    try{if(g.type==='LineString')feat.properties['الطول_km']=Number(turf.length(feat,{units:'kilometers'})).toFixed(4);}catch(e){}
+  }
+}
+function startEditSelected(){
+  cancelEditSession();
+  if(selectedFeatures.length!==1)return showT('⚠️ اختر معلماً واحداً فقط ثم اضغط تعديل المحدد');
+  const sel=selectedFeatures[0],lyr=layers.find(l=>l.id===sel.lyrId),feat=sel.feat;
+  if(!lyr||!feat)return showT('⚠️ المعلم المحدد غير موجود');
+  const coords=featureCoordsForEdit(feat);
+  if(!coords.length||!['Point','LineString','Polygon'].includes(feat.geometry.type))return showT('⚠️ نوع المعلم غير مدعوم للتحرير اليدوي');
+  editSession={lyr,feat,idx:sel.idx,original:JSON.parse(JSON.stringify(feat.geometry)),coords:coords.map(c=>[...c]),handles:L.layerGroup().addTo(map),leafletLayer:findLeafletFeatureLayer(lyr,feat)};
+  const rebuildHandles=()=>{
+    editSession.handles.clearLayers();
+    editSession.coords.forEach((c,i)=>{
+      const h=L.marker([c[1],c[0]],{draggable:true,autoPan:true,zIndexOffset:1000}).addTo(editSession.handles);
+      h.bindTooltip(String(i+1),{direction:'top',offset:[0,-8]});
+      h.on('drag',ev=>{
+        const ll=ev.target.getLatLng(); editSession.coords[i]=[ll.lng,ll.lat]; applyEditGeometry(editSession.feat,editSession.coords);
+        updateEditedLeafletGeometry();
+      });
+    });
+  };
+  editSession.rebuildHandles=rebuildHandles;
+  updateEditedLeafletGeometry(); rebuildHandles();
+  document.querySelectorAll('#draw-toolbar .dtbtn').forEach(b=>b.classList.remove('on'));
+  showT('🛠️ وضع التعديل: اسحب الرؤوس ثم اضغط حفظ أو إلغاء التعديل');
+}
+function updateEditedLeafletGeometry(){
+  const es=editSession;if(!es?.leafletLayer)return;
+  const g=es.feat.geometry, ll=es.coords.map(c=>L.latLng(c[1],c[0]));
+  try{
+    if(g.type==='Point')es.leafletLayer.setLatLng(ll[0]);
+    else if(g.type==='LineString')es.leafletLayer.setLatLngs(ll);
+    else if(g.type==='Polygon')es.leafletLayer.setLatLngs([ll]);
+    es.leafletLayer.setStyle(makeStyle(es.lyr,es.feat,true));
+  }catch(e){}
+}
+function saveEditSession(){
+  if(!editSession)return showT('ℹ️ لا يوجد تعديل نشط');
+  const es=editSession; if(es.feat.geometry?.type==='LineString'&&es.coords.length<2)return showT('⚠️ الخط يحتاج نقطتين');
+  refreshLayerOnMap(es.lyr); activeId=es.lyr.id; selectedFeatures=[{key:getSelectionKey(es.lyr.id,es.idx),lyrId:es.lyr.id,idx:es.idx,feat:es.feat}];
+  const handles=es.handles; if(handles)map.removeLayer(handles); editSession=null; updateAllUI();updateFeatureSelectionStyles();showT('💾 تم حفظ التعديل');
+}
+function cancelEditSession(){
+  if(!editSession)return;
+  const es=editSession; es.feat.geometry=JSON.parse(JSON.stringify(es.original));
+  if(es.handles)map.removeLayer(es.handles); editSession=null; refreshLayerOnMap(es.lyr); updateAllUI();showT('↩️ تم إلغاء التعديل');
+}
+function deleteSelectedDrawing(){
+  if(!selectedFeatures.length)return showT('⚠️ اختر معلماً أولاً');
+  if(typeof deleteSelectedAttrRows==='function'){deleteSelectedAttrRows();showT('🗑️ تم حذف المعلم المحدد');}
+}
+
 function getActColor(){return layers.find(l=>l.id===activeId)?.color||'#166534';}
 
 /* ═══════════════════════════════════════════════════════════════
@@ -3339,6 +3690,80 @@ function changeCRS(v){
   showT('✓ نظام الإحداثيات: '+n);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOM BASEMAP MANAGER — XYZ / WMS / WMTS REST
+═══════════════════════════════════════════════════════════════ */
+let customBasemaps=[];
+const CUSTOM_BM_KEY='geoverse_custom_basemaps_v1';
+function loadCustomBasemaps(){
+  try{customBasemaps=JSON.parse(localStorage.getItem(CUSTOM_BM_KEY)||'[]');}catch(e){customBasemaps=[];}
+  customBasemaps.forEach(b=>{try{TILES[b.id]=createCustomBasemapLayer(b);}catch(e){}});
+  renderCustomBasemapList();
+}
+function createCustomBasemapLayer(b){
+  const common={maxZoom:22,attribution:b.attribution||''};
+  if(b.type==='wms') return L.tileLayer.wms(b.url,{layers:b.layers,format:b.format||'image/png',transparent:b.transparent!==false,version:b.version||'1.3.0',crs:L.CRS[b.crs==='EPSG:4326'?'EPSG4326':'EPSG3857'],styles:b.styles||'',...common});
+  let u=b.url;
+  if(b.subdomains) common.subdomains=b.subdomains;
+  return L.tileLayer(u,common);
+}
+function toggleCustomBasemapForm(force){
+  const f=document.getElementById('custom-bm-form'); if(!f)return;
+  f.style.display=(force===false?'none':(f.style.display==='none'||!f.style.display?'block':'none'));
+  if(f.style.display==='block') updateCustomBasemapForm();
+}
+function updateCustomBasemapForm(){
+  const t=document.getElementById('cbm-type')?.value||'xyz';
+  const wf=document.getElementById('cbm-wms-fields'), hint=document.getElementById('cbm-xyz-hint');
+  if(wf)wf.style.display=t==='wms'?'block':'none';
+  if(hint)hint.textContent=t==='wms'?'WMS يحتاج رابط الخدمة واسم Layers.':(t==='wmts'?'استخدم قالب REST مثل .../{TileMatrix}/{TileRow}/{TileCol}.png أو القالب الذي يوفره الخادم.':'استخدم {z}/{x}/{y}، ويمكن استخدام {s} مع نطاقات مثل a,b,c.');
+}
+function getCustomBasemapForm(){
+  const name=(document.getElementById('cbm-name')?.value||'').trim();
+  const type=document.getElementById('cbm-type')?.value||'xyz';
+  const url=(document.getElementById('cbm-url')?.value||'').trim();
+  if(!name||!url) throw new Error('أدخل اسم الخدمة والرابط.');
+  if(type==='wms' && !(document.getElementById('cbm-layers')?.value||'').trim()) throw new Error('أدخل قيمة Layers لخدمة WMS.');
+  return {id:'custom_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7),name,type,url,
+    layers:(document.getElementById('cbm-layers')?.value||'').trim(),format:(document.getElementById('cbm-format')?.value||'image/png').trim(),
+    crs:document.getElementById('cbm-crs')?.value||'EPSG:3857',styles:(document.getElementById('cbm-styles')?.value||'').trim(),
+    attribution:(document.getElementById('cbm-attrib')?.value||'').trim(),subdomains:'abcd',version:'1.3.0'};
+}
+function testCustomBasemap(){
+  try{const b=getCustomBasemapForm(); const layer=createCustomBasemapLayer(b); layer.addTo(map); layer.bringToBack();
+    let ok=false; layer.once('tileload',()=>{ok=true; toast('تم تحميل بلاطة من الخدمة بنجاح.','ok');}); layer.once('tileerror',()=>{if(!ok)toast('تعذر تحميل البلاطات. تحقق من الرابط أو CORS أو صلاحيات الخدمة.','err');});
+    setTimeout(()=>{if(!ok)toast('لم يصل رد بلاطة خلال المهلة؛ قد تكون الخدمة بطيئة أو محمية.','warn');},8000);
+  }catch(e){toast(e.message,'err');}
+}
+function saveCustomBasemap(){
+  try{const b=getCustomBasemapForm(); const layer=createCustomBasemapLayer(b); TILES[b.id]=layer; customBasemaps.push(b); localStorage.setItem(CUSTOM_BM_KEY,JSON.stringify(customBasemaps));
+    renderCustomBasemapList(); setCustomBasemap(b.id); toggleCustomBasemapForm(false); toast('تم حفظ وإضافة الخريطة الخارجية.','ok');
+  }catch(e){toast(e.message,'err');}
+}
+function setCustomBasemap(id){
+  const b=customBasemaps.find(x=>x.id===id), target=TILES[id]; if(!b||!target)return;
+  if(TILES[curBM]&&map.hasLayer(TILES[curBM]))map.removeLayer(TILES[curBM]);
+  if(curBM==='osm'&&TILES.osmFallback&&map.hasLayer(TILES.osmFallback))map.removeLayer(TILES.osmFallback);
+  target.addTo(map); target.bringToBack(); curBM=id; osmFallbackActive=false;
+  document.querySelectorAll('.bmc').forEach(c=>c.classList.remove('act'));
+  document.querySelectorAll('.custom-bm-item').forEach(c=>c.classList.remove('act'));
+  const el=document.querySelector('[data-cbm-id="'+CSS.escape(id)+'"]'); if(el)el.classList.add('act');
+  updateDashboard();
+}
+function deleteCustomBasemap(id){
+  const b=customBasemaps.find(x=>x.id===id); if(!b)return;
+  if(TILES[id]&&map.hasLayer(TILES[id]))map.removeLayer(TILES[id]);
+  delete TILES[id]; customBasemaps=customBasemaps.filter(x=>x.id!==id); localStorage.setItem(CUSTOM_BM_KEY,JSON.stringify(customBasemaps));
+  if(curBM===id){curBM='osm'; if(TILES.osm)TILES.osm.addTo(map);}
+  renderCustomBasemapList(); updateDashboard();
+}
+function renderCustomBasemapList(){
+  const box=document.getElementById('custom-bm-list'); if(!box)return;
+  if(!customBasemaps.length){box.innerHTML='<div class="small" style="padding:6px;color:var(--text3)">لا توجد خدمات مخصصة محفوظة.</div>';return;}
+  box.innerHTML=customBasemaps.map(b=>`<div class="custom-bm-item ${curBM===b.id?'act':''}" data-cbm-id="${b.id}" style="display:flex;align-items:center;gap:6px;padding:7px;margin-top:5px;border:1px solid var(--border);border-radius:6px;cursor:pointer" onclick="setCustomBasemap('${b.id}')"><span style="flex:1;min-width:0"><b>${escapeHtml(b.name)}</b><span class="small" style="margin-inline-start:6px">${b.type.toUpperCase()}</span></span><button class="btn" type="button" onclick="event.stopPropagation();deleteCustomBasemap('${b.id}')" title="حذف">🗑️</button></div>`).join('');
+}
+function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
 function setBM(k,el){
   if(TILES[curBM] && map.hasLayer(TILES[curBM])) map.removeLayer(TILES[curBM]);
   if(curBM==='osm' && TILES.osmFallback && map.hasLayer(TILES.osmFallback)) map.removeLayer(TILES.osmFallback);
@@ -3352,6 +3777,8 @@ function setBM(k,el){
   if(el)el.classList.add('act');
   updateDashboard();
 }
+
+loadCustomBasemaps();
 
 /* ═══════════════════════════════════════════════════════════════
    ATTR SEARCH
@@ -4617,53 +5044,90 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
 
 <!-- Geospatial Analysis Tools Initialization -->
 <script>
+/* ═══ DIGITIZING PRO — SNAP / VERTICES / MERGE / SPLIT ═══ */
+let gvSnapEnabled=false, gvSnapLayer=null;
+function toggleSnapMode(){
+  gvSnapEnabled=!gvSnapEnabled;
+  document.getElementById('dt-snap')?.classList.toggle('on',gvSnapEnabled);
+  showT(gvSnapEnabled?'🧲 تم تفعيل الالتقاط':'🧲 تم إيقاف الالتقاط');
+}
+function snapLatLng(latlng, excludeFeat=null){
+  if(!gvSnapEnabled)return latlng;
+  let best=null,bestD=Infinity;
+  layers.forEach(lyr=>lyr.features.forEach(f=>{
+    if(f===excludeFeat)return;
+    const g=f.geometry;if(!g)return;
+    const pts=[];
+    const add=c=>{if(Array.isArray(c)&&typeof c[0]==='number')pts.push(c);else if(Array.isArray(c))c.forEach(add);};
+    add(g.coordinates);
+    pts.forEach(c=>{const p=L.latLng(c[1],c[0]),d=map.distance(latlng,p);if(d<bestD&&d<=25){bestD=d;best=p;}});
+  }));
+  return best||latlng;
+}
+const _gvOldMapClick=map.on;
+function addVertexToSelected(){
+  if(selectedFeatures.length!==1)return showT('⚠️ اختر معلماً خطياً أو مضلعاً واحداً');
+  const s=selectedFeatures[0],g=s.feat.geometry;
+  if(!g||!['LineString','Polygon'].includes(g.type))return showT('⚠️ إضافة الرؤوس متاحة للخطوط والمضلعات');
+  const arr=g.type==='Polygon'?g.coordinates[0]:g.coordinates;
+  const clean=g.type==='Polygon'?arr.slice(0,-1):arr;
+  if(clean.length<2)return showT('⚠️ لا توجد رؤوس كافية');
+  let bestI=0,bestD=Infinity; const c=map.getCenter();
+  for(let i=0;i<clean.length;i++){const a=L.latLng(clean[i][1],clean[i][0]),b=L.latLng(clean[(i+1)%clean.length][1],clean[(i+1)%clean.length][0]);const mid=L.latLng((a.lat+b.lat)/2,(a.lng+b.lng)/2);const d=map.distance(c,mid);if(d<bestD){bestD=d;bestI=i+1;}}
+  clean.splice(bestI,0,[c.lng,c.lat]);
+  if(g.type==='Polygon')clean.push([...clean[0]]);
+  refreshLayerOnMap(layers.find(l=>l.id===s.lyrId)); renderAttrTable(layers.find(l=>l.id===s.lyrId)); showT('➕ تمت إضافة رأس عند مركز الخريطة');
+}
+function deleteVertexFromSelected(){
+  if(selectedFeatures.length!==1)return showT('⚠️ اختر معلماً واحداً');
+  const s=selectedFeatures[0],g=s.feat.geometry;
+  if(!g||!['LineString','Polygon'].includes(g.type))return showT('⚠️ حذف الرؤوس متاح للخطوط والمضلعات');
+  const arr=g.type==='Polygon'?g.coordinates[0]:g.coordinates;
+  const clean=g.type==='Polygon'?arr.slice(0,-1):arr;
+  if(clean.length<=2 || (g.type==='Polygon'&&clean.length<=3))return showT('⚠️ لا يمكن حذف رأس إضافي من هذا الشكل');
+  const c=map.getCenter();let bi=0,bd=Infinity;clean.forEach((p,i)=>{const d=map.distance(c,L.latLng(p[1],p[0]));if(d<bd){bd=d;bi=i;}});clean.splice(bi,1);if(g.type==='Polygon')clean.push([...clean[0]]);
+  refreshLayerOnMap(layers.find(l=>l.id===s.lyrId));renderAttrTable(layers.find(l=>l.id===s.lyrId));showT('➖ تم حذف أقرب رأس إلى مركز الخريطة');
+}
+function mergeSelectedDrawings(){
+  if(selectedFeatures.length<2)return showT('⚠️ حدد معلمين أو أكثر من نفس الطبقة للدمج');
+  const ids=new Set(selectedFeatures.map(x=>x.lyrId));if(ids.size!==1)return showT('⚠️ يجب أن تكون المعالم من نفس الطبقة');
+  const lyr=layers.find(l=>l.id===selectedFeatures[0].lyrId);if(!lyr)return;
+  const feats=selectedFeatures.map(x=>x.feat),types=new Set(feats.map(f=>f.geometry?.type));
+  if(types.size!==1)return showT('⚠️ يجب أن تكون المعالم من نفس النوع');
+  const gt=feats[0].geometry.type;let merged;
+  try{if(gt==='LineString')merged=turf.combine({type:'FeatureCollection',features:feats}).features[0];else if(gt==='Polygon')merged=turf.union(turf.featureCollection(feats));else return showT('⚠️ الدمج متاح حالياً للخطوط والمضلعات');}catch(e){return showT('❌ تعذر دمج المعالم: '+e.message)}
+  const keep=new Set(feats);lyr.features=lyr.features.filter(f=>!keep.has(f));merged.properties={...feats[0].properties,اسم_العملية:'Merge'};lyr.features.push(merged);refreshLayerOnMap(lyr);selectedFeatures=[{key:getSelectionKey(lyr.id,lyr.features.length-1),lyrId:lyr.id,idx:lyr.features.length-1,feat:merged}];updateAllUI();showT('🔗 تم دمج المعالم المحددة');
+}
+function splitSelectedLine(){
+  if(selectedFeatures.length!==1)return showT('⚠️ اختر خطاً واحداً');
+  const s=selectedFeatures[0],g=s.feat.geometry;if(g?.type!=='LineString')return showT('⚠️ التقسيم متاح لخط LineString فقط');
+  const coords=g.coordinates;if(coords.length<3)return showT('⚠️ الخط يحتاج إلى 3 رؤوس على الأقل');
+  const mid=Math.floor(coords.length/2),a=coords.slice(0,mid+1),b=coords.slice(mid);if(a.length<2||b.length<2)return showT('⚠️ تعذر تقسيم الخط');
+  const lyr=layers.find(l=>l.id===s.lyrId);lyr.features=lyr.features.filter(f=>f!==s.feat);lyr.features.push({type:'Feature',geometry:{type:'LineString',coordinates:a},properties:{...s.feat.properties,جزء:1}},{type:'Feature',geometry:{type:'LineString',coordinates:b},properties:{...s.feat.properties,جزء:2}});refreshLayerOnMap(lyr);selectedFeatures=[];updateAllUI();showT('✂️ تم تقسيم الخط إلى جزأين');
+}
+</script>
+<script>
 // Leaflet-Geoman Initialization
-function toggleGeoman() {
-    if (!map.pm) {
-        console.error("Geoman is not loaded.");
-        return;
+function toggleGeoman(){
+  if(!map.pm){showT('⚠️ أدوات Geoman لم تُحمّل؛ استخدم شريط الرسم الأساسي');return;}
+  stopDraw();cancelEditSession();
+  try{
+    if(!window.__gvPmInitialized){
+      map.pm.addControls({position:'topleft',drawCircleMarker:false,drawPolyline:true,editMode:true,dragMode:true,cutPolygon:true,removalMode:true,drawMarker:true,drawPolygon:true,drawRectangle:true,drawCircle:true,drawText:false});
+      map.pm.setGlobalOptions({snappable:true,snapDistance:20,allowSelfIntersection:false,measurements:{measurement:true,displayFormat:'metric'}});
+      window.__gvPmInitialized=true;
+      map.on('pm:create',function(e){
+        const geo=e.layer?.toGeoJSON?.();
+        if(e.layer)map.removeLayer(e.layer);
+        if(geo?.geometry){addLayerFromGeoJSON({type:'FeatureCollection',features:[geo]},'رسم Geoman',getActColor(),80);showT('✅ تمت إضافة الرسم إلى طبقة جديدة');}
+      });
+      map.on('pm:remove',function(){showT('🗑️ تمت إزالة المعلم من وضع Geoman');});
+      map.on('pm:edit',function(e){showT('✏️ تم تعديل المعلم');});
     }
-    
-    // Toggle the Geoman toolbar
-    map.pm.toggleControls();
-    
-    // Setup Geoman controls if they aren't added yet
-    if (!map.pm.controlsVisible()) {
-        map.pm.addControls({
-            position: 'topleft',
-            drawCircleMarker: false,
-            drawPolyline: true,
-            editMode: true,
-            dragMode: true,
-            cutPolygon: true,
-            removalMode: true,
-            drawMarker: true,
-            drawPolygon: true,
-            drawRectangle: true,
-            drawCircle: true,
-            drawText: true
-        });
-        
-        // Setup snapping and measurements
-        map.pm.setGlobalOptions({
-            snappable: true,
-            snapDistance: 20,
-            allowSelfIntersection: false,
-            measurements: { measurement: true, displayFormat: 'metric' }
-        });
-        
-        if (!window.geomanDrawHooked) {
-            map.on('pm:create', function(e) {
-                const geojson = e.layer.toGeoJSON();
-                map.removeLayer(e.layer);
-                const fc = { type: 'FeatureCollection', features: [geojson] };
-                addLayerFromGeoJSON(fc, 'رسم (Geoman)', '#e74c3c', 80);
-            });
-            window.geomanDrawHooked = true;
-        }
-        
-        console.log("Geoman tools initialized with Snapping, Measurements, Editing, and Auto-Layer generation.");
-    }
+    const visible=!!map.pm.controlsVisible();
+    if(visible)map.pm.removeControls();else map.pm.addControls({position:'topleft',drawCircleMarker:false,drawPolyline:true,editMode:true,dragMode:true,cutPolygon:true,removalMode:true,drawMarker:true,drawPolygon:true,drawRectangle:true,drawCircle:true,drawText:false});
+    showT(visible?'🛑 تم إخفاء أدوات Geoman':'🧰 تم تفعيل أدوات Geoman المتقدمة');
+  }catch(err){console.error(err);showT('⚠️ تعذر تشغيل أدوات Geoman');}
 }
 
 // OpenLayers 9 Initialization Stub
@@ -4790,5 +5254,129 @@ function mergeSelectedLayers(){
   addLayerFromGeoJSON({type:'FeatureCollection',features},'دمج: '+chosen.map(l=>l.name).join(' + '),'#7c3aed',78);showT(`✓ تم دمج ${chosen.length} طبقات (${features.length} معلم)`);
 }
 </script>
-<!-- GeoVerse v1.1.2: hardened Overpass client with multi-endpoint fallback, timeout, bbox guard, and Turbo fallback -->
+<!-- GeoVerse v1.1.4: rebuilt digitizing/editing tools with multi-endpoint fallback, timeout, bbox guard, and Turbo fallback -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ADVANCED SPATIAL TOOLBOX
+═══════════════════════════════════════════════════════════════ */
+(function(){
+  const q=id=>document.getElementById(id);
+  const layerById=id=>(window.layers||[]).find(l=>String(l.id)===String(id));
+  const featList=l=>(l&&Array.isArray(l.features)?l.features:[]).filter(f=>f&&f.geometry);
+  const geomType=f=>f?.geometry?.type||'';
+  function status(msg,bad=false){const e=q('sa-status');if(e){e.textContent=msg;e.style.borderColor=bad?'#e9b5b5':'#d9e4e4';e.style.background=bad?'#fff6f6':'#f8fbfb';}}
+  function fillSelect(sel, selected){
+    if(!sel) return;
+    const old=selected||sel.value;
+    sel.innerHTML='<option value="">— اختر —</option>'+(window.layers||[]).map(l=>`<option value="${String(l.id).replace(/"/g,'&quot;')}">${String(l.name).replace(/</g,'&lt;')}</option>`).join('');
+    if(old && [...sel.options].some(o=>o.value===String(old))) sel.value=old;
+  }
+  function fillFieldSelect(){
+    const l=layerById(q('sa-layer-a')?.value); const sel=q('sa-field'); if(!sel)return;
+    const keys=[...new Set(featList(l).flatMap(f=>Object.keys(f.properties||{})))];
+    const old=sel.value; sel.innerHTML='<option value="">بدون حقل</option>'+keys.map(k=>`<option value="${String(k).replace(/"/g,'&quot;')}">${String(k).replace(/</g,'&lt;')}</option>`).join('');
+    if(keys.includes(old)) sel.value=old;
+  }
+  window.openSpatialToolbox=function(){
+    if(typeof updateLayerSelects==='function') try{updateLayerSelects();}catch(e){}
+    fillSelect(q('sa-layer-a'), window.activeId); fillSelect(q('sa-layer-b'));
+    const a=q('sa-layer-a'); if(a && !a.value && window.layers?.[0]) a.value=window.layers[0].id;
+    fillFieldSelect(); updateSpatialToolUI(); openM('m-spatial-toolbox');
+  };
+  window.updateSpatialToolUI=function(){
+    const op=q('sa-op')?.value||'buffer';
+    const two=['clip','intersect','union','difference','nearest','distance','pointinpoly','spatialjoin'].includes(op);
+    const dist=['buffer'].includes(op), field=op==='dissolve';
+    if(q('sa-layer-b-wrap')) q('sa-layer-b-wrap').style.display=two?'block':'none';
+    if(q('sa-distance-wrap')) q('sa-distance-wrap').style.display=dist?'block':'none';
+    if(q('sa-unit-wrap')) q('sa-unit-wrap').style.display=dist||op==='distance'?'block':'none';
+    if(q('sa-field-wrap')) q('sa-field-wrap').style.display=field?'block':'none';
+    if(q('sa-name') && !q('sa-name').value) q('sa-name').value={buffer:'Buffer',clip:'Clip',intersect:'Intersect',union:'Union',difference:'Difference',dissolve:'Dissolve',merge:'Merged',centroid:'Centroids',convex:'Convex Hull',nearest:'Nearest',distance:'Distance Matrix',pointinpoly:'Point in Polygon',spatialjoin:'Spatial Join'}[op]||'Spatial Result';
+    fillFieldSelect();
+  };
+  q('sa-layer-a')?.addEventListener('change',fillFieldSelect);
+  function requireTurf(){if(typeof turf==='undefined') throw new Error('مكتبة Turf.js غير متاحة');}
+  function req(a,b){const A=layerById(a),B=layerById(b);if(!A)throw new Error('اختر الطبقة الأساسية');if(b!==undefined&&!B)throw new Error('اختر الطبقة الثانية');return [A,B];}
+  function asFeature(g){return g?.type==='Feature'?g:{type:'Feature',geometry:g,properties:{}};}
+  function pointOn(f){try{return turf.pointOnFeature(f);}catch(e){try{return turf.centroid(f);}catch(_){return null;}}}
+  function addResult(fc,name){
+    if(!fc||!Array.isArray(fc.features)||!fc.features.length) throw new Error('لم تنتج العملية أي معالم');
+    const safe=(name||'Spatial Result').trim()||'Spatial Result';
+    if(typeof addLayerFromGeoJSON!=='function') throw new Error('وظيفة إضافة الطبقات غير متاحة');
+    addLayerFromGeoJSON(fc,safe,'#7c3aed',78);
+    if(typeof updateAllUI==='function') try{updateAllUI();}catch(e){}
+    showT('✓ تم إنشاء طبقة: '+safe+' ('+fc.features.length+' معلم)');
+    return fc;
+  }
+  function overlayMany(A,B,op){
+    const out=[];
+    for(const a of featList(A)) for(const b of featList(B)){
+      if(!/Polygon|MultiPolygon/i.test(geomType(a))||!/Polygon|MultiPolygon/i.test(geomType(b))) continue;
+      try{
+        let r=null;
+        if(op==='intersect'||op==='clip') r=turf.intersect(a,b);
+        else if(op==='difference') r=turf.difference(a,b);
+        else if(op==='union') r=turf.union(a,b);
+        if(r){r.properties={...(a.properties||{}),...Object.fromEntries(Object.entries(b.properties||{}).map(([k,v])=>['B_'+k,v]))};out.push(r);}
+      }catch(e){}
+    }
+    return {type:'FeatureCollection',features:out};
+  }
+  function unionAll(A){
+    const fs=featList(A).filter(f=>/Polygon|MultiPolygon/i.test(geomType(f))); if(!fs.length) throw new Error('Union يحتاج طبقة مضلعات');
+    let r=fs[0]; for(let i=1;i<fs.length;i++){try{const u=turf.union(r,fs[i]);if(u)r=u;}catch(e){}}
+    return {type:'FeatureCollection',features:[r]};
+  }
+  function dissolveBy(A,field){
+    const groups=new Map();
+    for(const f of featList(A)){const k=field?(f.properties||{})[field]??'': '__ALL__';if(!groups.has(String(k)))groups.set(String(k),[]);groups.get(String(k)).push(f);}
+    const out=[];
+    for(const [k,fs] of groups){let r=fs[0];for(let i=1;i<fs.length;i++){try{const u=turf.union(r,fs[i]);if(u)r=u;}catch(e){}}r.properties=field?{[field]:k}:{count:fs.length};out.push(r);}
+    return {type:'FeatureCollection',features:out};
+  }
+  function nearest(A,B){
+    const targets=featList(B).map((f,i)=>({f,i,p:pointOn(f)})).filter(x=>x.p); const out=[];
+    if(!targets.length) throw new Error('الطبقة الثانية لا تحتوي معالم قابلة للقياس');
+    featList(A).forEach((f,i)=>{const p=pointOn(f);if(!p)return;let best=null;for(const t of targets){try{const d=turf.distance(p,t.p,{units:'kilometers'});if(!best||d<best.d)best={d,t};}catch(e){}}if(best){out.push({type:'Feature',geometry:f.geometry,properties:{...(f.properties||{}),nearest_index:best.t.i,distance_km:+best.d.toFixed(6)}});}});
+    return {type:'FeatureCollection',features:out};
+  }
+  function distanceMatrix(A,B,unit){
+    const a=featList(A).map(pointOn).filter(Boolean), b=featList(B).map(pointOn).filter(Boolean); const rows=[];
+    if(!a.length||!b.length) throw new Error('الطبقتان تحتاجان معالم مكانية');
+    a.forEach((pa,i)=>b.forEach((pb,j)=>{let d=turf.distance(pa,pb,{units:unit||'kilometers'});rows.push({type:'Feature',geometry:pa.geometry,properties:{from:i+1,to:j+1,distance:+d.toFixed(6),unit:unit||'kilometers'}});}));
+    return {type:'FeatureCollection',features:rows};
+  }
+  function pointInPoly(A,B){
+    const points=featList(A).filter(f=>/Point|MultiPoint/i.test(geomType(f))), polys=featList(B).filter(f=>/Polygon|MultiPolygon/i.test(geomType(f))),out=[];
+    points.forEach((p,i)=>{for(let j=0;j<polys.length;j++){try{if(turf.booleanPointInPolygon(p,polys[j])){out.push({type:'Feature',geometry:p.geometry,properties:{...(p.properties||{}),polygon_index:j+1}});break;}}catch(e){}}});
+    return {type:'FeatureCollection',features:out};
+  }
+  function spatialJoin(A,B){
+    const targets=featList(B),out=[];
+    featList(A).forEach((f,i)=>{let hit=null;const p=/Point/i.test(geomType(f))?f:pointOn(f);for(let j=0;j<targets.length;j++){try{const t=targets[j];let yes=false;if(/Polygon/i.test(geomType(t))&&/Point/i.test(geomType(p)))yes=turf.booleanPointInPolygon(p,t);else if(/Polygon/i.test(geomType(t))){const q=pointOn(t);yes=q&&p&&turf.distance(p,q,{units:'kilometers'})<0.001;}else if(p&&pointOn(t))yes=turf.distance(p,pointOn(t),{units:'kilometers'})<0.001;if(yes){hit={j,t};break;}}catch(e){}}if(hit)out.push({type:'Feature',geometry:f.geometry,properties:{...(f.properties||{}),...Object.fromEntries(Object.entries(hit.t.properties||{}).map(([k,v])=>['join_'+k,v])),join_index:hit.j+1}});});
+    return {type:'FeatureCollection',features:out};
+  }
+  window.runSpatialAnalysis=function(){
+    try{
+      requireTurf(); const op=q('sa-op').value, aId=q('sa-layer-a').value, bId=q('sa-layer-b').value, name=q('sa-name').value, [A,B]=req(aId,['buffer','dissolve','merge','centroid','convex'].includes(op)?undefined:bId); let fc;
+      status('⏳ جارٍ تنفيذ '+op+'...');
+      if(op==='buffer'){
+        const d=parseFloat(q('sa-distance').value);if(!(d>=0))throw new Error('أدخل مسافة صحيحة');const u=q('sa-unit').value;fc={type:'FeatureCollection',features:featList(A).map(f=>{try{const r=turf.buffer(f,d,{units:u});if(r)r.properties={...(f.properties||{})};return r;}catch(e){return null;}}).filter(Boolean)};
+      } else if(op==='clip'||op==='intersect'||op==='difference') fc=overlayMany(A,B,op);
+      else if(op==='union') fc=unionAll(A);
+      else if(op==='dissolve') fc=dissolveBy(A,q('sa-field').value);
+      else if(op==='merge') fc={type:'FeatureCollection',features:[...featList(A),...featList(B)]};
+      else if(op==='centroid') fc={type:'FeatureCollection',features:featList(A).map((f,i)=>{const r=pointOn(f);if(r)r.properties={...(f.properties||{}),source_index:i+1};return r;}).filter(Boolean)};
+      else if(op==='convex'){const r=turf.convex({type:'FeatureCollection',features:featList(A)});fc=r?{type:'FeatureCollection',features:[r]}:{type:'FeatureCollection',features:[]};}
+      else if(op==='nearest') fc=nearest(A,B);
+      else if(op==='distance') fc=distanceMatrix(A,B,q('sa-unit').value==='meters'?'meters':'kilometers');
+      else if(op==='pointinpoly') fc=pointInPoly(A,B);
+      else if(op==='spatialjoin') fc=spatialJoin(A,B);
+      else throw new Error('عملية غير معروفة');
+      addResult(fc,name); status('✓ اكتملت العملية بنجاح: '+fc.features.length+' معلم');
+    }catch(e){status('⚠️ '+(e?.message||'حدث خطأ أثناء التحليل'),true);showT('⚠️ '+(e?.message||'فشل التحليل'));}
+  };
+})();
+</script>
 </body></html>

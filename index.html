@@ -607,7 +607,18 @@ nav.hnav::-webkit-scrollbar{display:none}
     border-color: var(--border2);
 }
 </style>
-</head>
+
+<link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Widgets/widgets.css">
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
+<style id="gv-final-3d">
+#m3d{display:none;position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#09151d}
+#cesiumContainer{position:absolute;inset:0;width:100%;height:100%}
+.gv3d-mini{position:absolute;z-index:50;top:10px;right:10px;width:320px;display:flex;gap:5px;flex-wrap:wrap;padding:6px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);backdrop-filter:blur(8px)}
+.gv3d-mini .btn{font-size:9px!important;min-height:27px!important;padding:5px 7px!important}
+.gv3d-msg{position:absolute;z-index:50;left:10px;bottom:10px;padding:6px 9px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:8px;font-size:9px;color:var(--text2);box-shadow:0 5px 18px rgba(0,0,0,.1)}
+#tab-buildings{display:none;height:100%;overflow:auto}
+.bs{padding:10px}.bs h3{font-size:12px;color:var(--g1);margin:0 0 7px}.bs p{font-size:9px;color:var(--text3);line-height:1.65}.bsgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.bsgrid label{font-size:9px;font-weight:800;color:var(--text2)}.bsgrid input,.bsgrid select{width:100%;margin-top:3px;padding:6px;font-size:10px}.bsrow{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}.bsstatus{margin-top:7px;padding:7px;border:1px dashed var(--border);border-radius:8px;font-size:9px;color:var(--text3)}
+</style></head>
 <body class="" style="">
 <!-- LOADING -->
 <!-- HEADER -->
@@ -670,11 +681,12 @@ nav.hnav::-webkit-scrollbar{display:none}
 <button class="stab" onclick="switchLeftTab(this, 'layers')"><i class="fa-solid fa-layer-group"></i> طبقات</button>
 <button class="stab" onclick="switchLeftTab(this, 'basemap')"><i class="fa-solid fa-map"></i> خلفية</button>
 <button class="stab" onclick="switchLeftTab(this, 'classify')"><i class="fa-solid fa-swatchbook"></i> تصنيف</button>
-<button class="stab act" id="geopy-tab" onclick="switchLeftTab(this, 'geopy')"><i class="fa-brands fa-python"></i> GeoPy</button></div>
+<button class="stab act" id="geopy-tab" onclick="switchLeftTab(this, 'geopy')"><i class="fa-brands fa-python"></i> GeoPy</button>
+<button class="stab" id="building-tab" onclick="switchLeftTab(this, 'buildings')"><i class="fa-solid fa-building"></i> مباني 3D</button></div>
 <div class="sbb">
 <!-- LAYERS TAB -->
 <div id="tab-layers" style="display: none;">
-<div class="small" style="margin:0 0 8px">في وضع التحديد يمكنك استخدام Shift + Click للتحديد المتعدد.</div><div class="mode-toggle">
+<div class="small" style="margin:0 0 8px">في وضع التحديد يمكنك استخدام Shift + Click للتحديد المتعدد.</div><div id="tab-buildings"><div class="bs"><h3><i class="fa-solid fa-cube"></i> Building Studio</h3><p>ارسم بصمة المبنى على خريطة 2D ثم حدد الارتفاع وعدد الطوابق. المبنى يصبح Feature حقيقيًا ويمكن عرضه كمجسم في 3D.</p><div class="bsgrid"><label>الارتفاع (m)<input id="bs-height" type="number" value="12" min="1" step="0.5"></label><label>الطوابق<input id="bs-floors" type="number" value="3" min="1"></label><label>الاسم<input id="bs-name" value="Building 01"></label><label>السقف<select id="bs-roof"><option>flat</option><option>gable</option><option>hip</option></select></label></div><div class="bsrow"><button class="btn bp" onclick="gvBuildingStartRect()"><i class="fa-solid fa-vector-square"></i> مستطيل</button><button class="btn bg" onclick="gvBuildingStartPoly()"><i class="fa-solid fa-draw-polygon"></i> Polygon</button></div><div class="bsrow"><button class="btn bp" onclick="gvBuildingFinish()"><i class="fa-solid fa-check"></i> إنشاء</button><button class="btn bg" onclick="gvBuildingCancel()"><i class="fa-solid fa-xmark"></i> إلغاء</button></div><button class="btn bp" style="width:100%;justify-content:center;margin-top:6px" onclick="setView('3d')"><i class="fa-solid fa-cube"></i> فتح 3D</button><div id="bs-status" class="bsstatus">جاهز.</div></div></div><div class="mode-toggle">
 <button class="mode-btn act" id="mode-pan" onclick="setMapMode('pan')"><i class="fa-solid fa-hand"></i> تحريك</button>
 <button class="mode-btn" id="mode-sel" onclick="setMapMode('select')"><i class="fa-solid fa-arrow-pointer"></i> تحديد</button>
 </div>
@@ -840,12 +852,7 @@ def run_tool():
 <!-- MAP AREA -->
 <div id="ma">
 <div id="m2d"></div>
-<div id="m3d">
-<div style="font-size:48px">🌐</div>
-<div style="font-size:16px;font-weight:900;color:var(--g1)">العرض ثلاثي الأبعاد</div>
-<div class="small" style="max-width:260px;text-align:center;line-height:1.8">جاهز لتوصيل Cesium أو أي محرّك 3D</div>
-<button class="btn bp" onclick="setView('2d')"><i class="fa-solid fa-map"></i> العودة لـ 2D</button>
-</div>
+<div id="m3d"><div id="cesiumContainer"></div><div class="gv3d-mini"><button class="btn bg" onclick="gv3dLoadActive()"><i class="fa-solid fa-layer-group"></i> الطبقة</button><button class="btn bg" onclick="gv3dLoadBuildings()"><i class="fa-solid fa-building"></i> المباني</button><button class="btn bg" onclick="gv3dZoomActive()"><i class="fa-solid fa-location-crosshairs"></i> Zoom</button><button class="btn bg" onclick="gv3dHome()"><i class="fa-solid fa-globe"></i> الأرض</button><button class="btn bg" onclick="gv3dClear()"><i class="fa-solid fa-eraser"></i> مسح</button><button class="btn bp" onclick="setView('2d')"><i class="fa-solid fa-map"></i> 2D</button></div><div id="gv3d-msg" class="gv3d-msg">جارٍ تجهيز الكرة الأرضية…</div></div>
 <!-- GEO AI PANEL -->
 <div class="float-panel show" id="ai-panel" style="display: none;">
 <div style="background: rgb(26, 58, 58); color: rgb(255, 255, 255); padding: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;"><span><i class="fa-solid fa-user-gear"></i> GeoAI Master (GIS Engineer)</span><button onclick="document.getElementById('ai-panel').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer;">×</button></div>
@@ -3942,7 +3949,7 @@ function renderGeoPyTools(){
 
 function switchLeftTab(el,tab){
   document.querySelectorAll('#sb .stab').forEach(t=>t.classList.toggle('act',t===el));
-  ['layers','basemap','classify','stats','geopy'].forEach(t=>{
+  ['layers','basemap','classify','stats','geopy','buildings'].forEach(t=>{
     const d=document.getElementById('tab-'+t);
     if(!d)return;
     d.classList.toggle('geopy-active',t==='geopy' && tab==='geopy');
@@ -5379,4 +5386,35 @@ function mergeSelectedLayers(){
   };
 })();
 </script>
-</body></html>
+<script>
+/* GeoVerse Stable 3D + Building Studio */
+let gv3d=null,gv3dDS=[],gvBMode=null,gvBStart=null,gvBVertices=[],gvBPreview=null;
+function gv3dMsg(t){const e=document.getElementById('gv3d-msg');if(e)e.textContent=t}
+function gv3dHome(){if(!gv3d)return;gv3d.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(30.8025,30.464,1800000),orientation:{heading:0,pitch:Cesium.Math.toRadians(-55),roll:0},duration:1})}
+function initGV3D(){
+ if(gv3d)return gv3d;
+ if(typeof Cesium==='undefined'){gv3dMsg('Cesium لم يتم تحميله. افتح الملف مع اتصال بالإنترنت.');return null}
+ try{
+  const imagery=new Cesium.UrlTemplateImageryProvider({url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',maximumLevel:19,credit:'© OpenStreetMap contributors'});
+  gv3d=new Cesium.Viewer('cesiumContainer',{animation:false,timeline:false,baseLayerPicker:false,geocoder:false,homeButton:false,sceneModePicker:false,navigationHelpButton:false,fullscreenButton:false,infoBox:true,selectionIndicator:true,terrainProvider:new Cesium.EllipsoidTerrainProvider(),baseLayer:false});
+  gv3d.imageryLayers.addImageryProvider(imagery);
+  gv3d.scene.globe.show=true;gv3d.scene.globe.enableLighting=false;gv3d.scene.globe.depthTestAgainstTerrain=false;
+  gv3dHome();setTimeout(()=>gv3d.resize(),200);gv3dMsg('الكرة الأرضية جاهزة.');return gv3d;
+ }catch(e){console.error(e);gv3dMsg('فشل تشغيل 3D: '+e.message);return null}
+}
+function gv3dFC(l){return {type:'FeatureCollection',features:(l?.features||[]).map(f=>({type:'Feature',geometry:f.geometry,properties:f.properties||{}}))}}
+async function gv3dLoadActive(){const v=initGV3D();if(!v)return;if(!activeId)return showT('⚠️ اختر طبقة أولاً');const l=layers.find(x=>x.id===activeId);if(!l)return;try{const ds=await Cesium.GeoJsonDataSource.load(gv3dFC(l),{clampToGround:false});v.dataSources.add(ds);gv3dDS.push(ds);await v.flyTo(ds,{duration:1});gv3dMsg('تم تحميل: '+l.name)}catch(e){console.error(e);gv3dMsg('تعذر تحميل الطبقة: '+e.message)}}
+async function gv3dLoadBuildings(){const v=initGV3D();if(!v)return;const bs=layers.filter(l=>l.buildingLayer===true);if(!bs.length)return showT('⚠️ لا توجد مباني. استخدم Building Studio أولاً.');for(const l of bs){const ds=await Cesium.GeoJsonDataSource.load(gv3dFC(l),{clampToGround:false});ds.entities.values.forEach((e,i)=>{const h=Math.max(1,Number(l.features[i]?.properties?.height||12));if(e.polygon){e.polygon.height=new Cesium.ConstantProperty(0);e.polygon.extrudedHeight=new Cesium.ConstantProperty(h);e.polygon.material=Cesium.Color.fromCssColorString(l.color||'#166534').withAlpha(.7);e.polygon.outline=true;e.polygon.outlineColor=Cesium.Color.fromCssColorString(l.color||'#166534')}});v.dataSources.add(ds);gv3dDS.push(ds)}gv3dMsg('تم تحميل '+bs.length+' طبقة مباني.')}
+function gv3dZoomActive(){if(!gv3d||!activeId)return;const l=layers.find(x=>x.id===activeId);try{const b=l.leafletLayer.getBounds();const c=b.getCenter();const d=Math.max(1500,Math.max(b.getNorth()-b.getSouth(),b.getEast()-b.getWest())*80000);gv3d.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(c.lng,c.lat,d),orientation:{heading:0,pitch:Cesium.Math.toRadians(-55),roll:0},duration:1})}catch(e){}}
+function gv3dClear(){if(!gv3d)return;gv3dDS.forEach(x=>gv3d.dataSources.remove(x,true));gv3dDS=[];gv3dMsg('تم مسح طبقات 3D.')}
+function gvBSStatus(t){const e=document.getElementById('bs-status');if(e)e.textContent=t}
+function gvBuildingStartRect(){gvBuildingCancel();gvBMode='rect';gvBSStatus('اسحب على الخريطة لرسم بصمة المبنى.');map.dragging.disable();map.getContainer().style.cursor='crosshair'}
+function gvBuildingStartPoly(){gvBuildingCancel();gvBMode='poly';gvBVertices=[];gvBSStatus('انقر نقاط المبنى ثم اضغط إنشاء.');map.dragging.disable();map.getContainer().style.cursor='crosshair'}
+function gvBuildingCancel(){if(gvBPreview){map.removeLayer(gvBPreview);gvBPreview=null}gvBMode=null;gvBStart=null;gvBVertices=[];if(map){map.dragging.enable();map.getContainer().style.cursor=''} }
+function gvBuildingFinish(){if(gvBMode==='rect'&&gvBPreview){const pts=gvBPreview.getBounds();gvCreateBuilding([[pts.getSouthWest().lng,pts.getSouthWest().lat],[pts.getNorthWest().lng,pts.getNorthWest().lat],[pts.getNorthEast().lng,pts.getNorthEast().lat],[pts.getSouthEast().lng,pts.getSouthEast().lat],[pts.getSouthWest().lng,pts.getSouthWest().lat]]);return}if(gvBMode==='poly'&&gvBVertices.length>=3){const c=gvBVertices.map(p=>[p.lng,p.lat]);c.push(c[0]);gvCreateBuilding(c);return}gvBSStatus('ارسم بصمة أولاً.')}
+function gvCreateBuilding(coords){const h=Math.max(1,Number(document.getElementById('bs-height').value||12));const floors=Math.max(1,Number(document.getElementById('bs-floors').value||3));const name=document.getElementById('bs-name').value.trim()||'Building '+(layers.length+1);const f={type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{name,height:h,floors,roof:document.getElementById('bs-roof').value,building:true}};let l=layers.find(x=>x.name==='Building Studio');if(!l){l=addLayerFromGeoJSON({type:'FeatureCollection',features:[f]},'Building Studio','#166534',90);l.buildingLayer=true}else{l.features.push(f);l.buildingLayer=true;refreshLayerOnMap(l);updateAllUI()}activeId=l.id;gvBuildingCancel();gvBSStatus('تم إنشاء '+name+' بارتفاع '+h+'m');showT('✓ تم إنشاء المبنى')}
+map?.on('mousedown',e=>{if(gvBMode==='rect'){gvBStart=e.latlng;map.on('mousemove',gvBRectMove)}else if(gvBMode==='poly'){gvBVertices.push(e.latlng);if(gvBPreview)map.removeLayer(gvBPreview);gvBPreview=L.polygon(gvBVertices,{color:'#166534',weight:2,fillOpacity:.2}).addTo(map)}});
+map?.on('mouseup',e=>{if(gvBMode==='rect'&&gvBStart){map.off('mousemove',gvBRectMove);gvBSStatus('البصمة جاهزة — اضغط إنشاء.')}});
+function gvBRectMove(e){if(gvBMode!=='rect'||!gvBStart)return;const b=L.latLngBounds(gvBStart,e.latlng);if(gvBPreview)gvBPreview.setBounds(b);else gvBPreview=L.rectangle(b,{color:'#166534',weight:2,fillOpacity:.2}).addTo(map)}
+const gvOriginalSetView=setView;setView=function(m){gvOriginalSetView(m);if(m==='3d'){const v=initGV3D();setTimeout(()=>v?.resize(),150)}else{try{map.invalidateSize()}catch(e){}}};
+</script></body></html>

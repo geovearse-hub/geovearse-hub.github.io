@@ -189,34 +189,64 @@ nav.hnav::-webkit-scrollbar{display:none}
 /* LEFT SIDEBAR — Layers + Tools */
 #sb{
   width:var(--sbw);min-width:160px;max-width:380px;
-  height:100%;background:var(--panel);backdrop-filter:blur(16px);
+  height:100%;background:rgba(255,255,255,.82);backdrop-filter:blur(18px);
   border-left:1px solid var(--border);
   display:flex;flex-direction:column;flex-shrink:0;
   position:relative;z-index:10;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
 }
-.sbtabs{display:flex;border-bottom:1px solid var(--border);background:var(--panel2)}
+.sbtabs{display:flex;border-bottom:1px solid var(--border);background:rgba(245,250,248,.9)}
 .stab{
   flex:1;padding:10px 4px;background:transparent;color:var(--text3);
   font-size:10px;font-weight:800;border:none;border-bottom:2px solid transparent;
   cursor:pointer;font-family:var(--font);transition:all .15s;
   display:flex;align-items:center;justify-content:center;gap:4px;
 }
-.stab.act{color:var(--g1);border-bottom-color:var(--g1);background:var(--panel)}
+.stab.act{color:var(--g1);border-bottom-color:var(--g1);background:rgba(224,244,241,.85)}
 .sbb{flex:1;overflow-y:auto;padding:10px}
 .sttl{font-size:9px;font-family:var(--mono);letter-spacing:2px;color:var(--text3);margin:10px 0 6px;text-transform:uppercase}
+
+@media (max-width: 980px){
+  :root{--hh:104px;--sbw:220px;--tpw:220px}
+  #hdr{
+    grid-template-columns:1fr auto;
+    grid-template-areas:"logo actions" "nav nav";
+    min-height:var(--hh);height:auto;padding:8px 10px;row-gap:6px;
+  }
+  .h-search{display:none}
+  .h-actions{justify-content:flex-end;flex-wrap:wrap}
+  nav.hnav{grid-column:1 / -1;padding-bottom:2px}
+  #app{top:var(--hh)}
+  #sb,#tp{width:var(--sbw)}
+}
+@media (max-width: 720px){
+  :root{--hh:92px;--sbw:180px;--tpw:170px}
+  #hdr{padding:8px 8px 6px;}
+  .logo-name{font-size:13px}
+  .logo-sub,.logo-ver{display:none}
+  nav.hnav{gap:2px;padding:0}
+  .nb{padding:6px 7px;font-size:10px}
+  .h-actions{gap:4px}
+  .h-actions .hdr-btn:nth-child(n+7){display:none}
+  #app{gap:6px;}
+  #sb,#tp{min-width:0;width:var(--sbw);max-width:var(--sbw)}
+  #tp{width:var(--tpw)}
+  .sbtabs,.tp-header,.tp-body,.tp-footer,.sbb{padding-inline:6px}
+}
 
 /* RIGHT PANEL — Tools/Edit */
 #tp{
   width:var(--tpw);min-width:160px;max-width:380px;
-  height:100%;background:var(--panel);backdrop-filter:blur(16px);
+  height:100%;background:rgba(255,255,255,.82);backdrop-filter:blur(18px);
   border-right:1px solid var(--border);
   display:flex;flex-direction:column;flex-shrink:0;
   position:relative;z-index:10;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
 }
-.tp-header{padding:10px 12px;border-bottom:1px solid var(--border);background:var(--panel2)}
+.tp-header{padding:10px 12px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(245,250,248,.94), rgba(255,255,255,.7))}
 .tp-title{font-size:12px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:6px}
 .tp-body{flex:1;overflow-y:auto;padding:10px}
-.tp-footer{border-top:1px solid var(--border);padding:8px 12px;background:var(--panel2);font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;line-height:1.5}
+.tp-footer{border-top:1px solid var(--border);padding:8px 12px;background:rgba(245,250,248,.9);font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;line-height:1.5}
 .tp-footer span{color:var(--g1);font-weight:800}
 
 .resize-handle{
@@ -351,24 +381,172 @@ nav.hnav::-webkit-scrollbar{display:none}
 .attr-r-item:hover{background:var(--g5);color:var(--g1)}
 .attr-r-item:last-child{border-bottom:none}
 
-/* GEO AI Panel */
-#ai-panel{
-  position:absolute;top:14px;right:54px;width:300px;max-height:calc(100% - 80px);
-  z-index:520;padding:0;display:none;overflow:hidden;border-radius:12px;
+/* GEO AI Panel */ 
+#ai-panel { 
+    position: absolute;
+    top: 14px;
+    right: 54px;
+    width: 320px; /* زيادة الطول قليلاً لراحة العين */
+    max-height: calc(100vh - 80px); /* استخدام vh لضمان التجاوب */
+    z-index: 520;
+    padding: 0;
+    display: none;
+    overflow: hidden;
+    border-radius: 16px; /* زوايا أكثر نعومة مدروسة حديثاً */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* إضافة ظل لمنح اللوحة عمقاً */
+    background: var(--panel);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
-#ai-panel.show{display:block}
-.ai-hdr{padding:10px 12px;background:var(--g5);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;justify-content:space-between}
-.ai-title{font-size:12px;font-weight:900;color:var(--g1);display:flex;align-items:center;gap:6px}
-.ai-body{height:280px;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.ai-msg{padding:8px 10px;border-radius:8px;font-size:11px;line-height:1.6;max-width:90%}
-.ai-msg.ai{background:var(--g5);color:var(--text);border-radius:8px 8px 8px 2px}
-.ai-msg.user{background:var(--g1);color:#fff;align-self:flex-end;border-radius:8px 8px 2px 8px}
-.ai-input{padding:8px 12px;border-top:1px solid var(--border);background:var(--panel2);display:flex;gap:6px}
-.ai-input input{flex:1;border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-family:var(--font);font-size:11px;background:var(--panel);outline:none;color:var(--text)}
-.ai-input button{padding:6px 10px;border-radius:7px;background:var(--grad);color:#fff;border:none;cursor:pointer;font-size:10px;font-weight:800;font-family:var(--font)}
-.ai-suggestions{display:flex;flex-wrap:wrap;gap:5px;padding:6px 12px 8px;border-top:1px solid var(--border)}
-.ai-sugg{padding:4px 8px;border-radius:6px;border:1px solid var(--border2);color:var(--g1);font-size:10px;cursor:pointer;background:var(--g5);transition:all .12s;font-family:var(--font)}
-.ai-sugg:hover{background:var(--g1);color:#fff}
+
+#ai-panel.show {
+    display: flex;
+    flex-direction: column;
+    animation: fadeInSlide 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-hdr {
+    padding: 12px 16px;
+    background: var(--g5);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.ai-title {
+    font-size: 13px; /* تكبير الخط قليلاً للوضوح */
+    font-weight: 700; /* وزن خط أنيق ومريح للقراءة */
+    color: var(--g1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-body {
+    flex: 1;
+    height: 300px; /* زيادة مساحة العرض للمحادثة */
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* مسافة أوسع بين الرسائل */
+    scroll-behavior: smooth;
+}
+
+/* تحسين شكل شريط التمرير (Scrollbar) */
+.ai-body::-webkit-scrollbar {
+    width: 4px;
+}
+.ai-body::-webkit-scrollbar-thumb {
+    background: var(--border2);
+    border-radius: 4px;
+}
+
+.ai-msg {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 85%;
+    word-break: break-word;
+    animation: msgPop 0.2s ease;
+}
+
+.ai-msg.ai {
+    background: var(--g5);
+    color: var(--text);
+    border-bottom-left-radius: 4px; /* انحناء مخصص لرسائل الذكاء الاصطناعي */
+    align-self: flex-start;
+}
+
+.ai-msg.user {
+    background: var(--g1);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px; /* انحناء مخصص لرسائل المستخدم */
+}
+
+.ai-input {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: var(--panel2);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.ai-input input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: var(--font);
+    font-size: 12px;
+    background: var(--panel);
+    outline: none;
+    color: var(--text);
+    transition: border-color 0.15s ease;
+}
+
+.ai-input input:focus {
+    border-color: var(--g1); /* تمييز الحقل عند الكتابة */
+}
+
+.ai-input button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--grad);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font);
+    transition: opacity 0.15s ease;
+}
+
+.ai-input button:hover {
+    opacity: 0.9;
+}
+
+.ai-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--panel2);
+}
+
+.ai-sugg {
+    padding: 6px 10px;
+    border-radius: 20px; /* جعل المقترحات على شكل كبسولات عصرية */
+    border: 1px solid var(--border2);
+    color: var(--g1);
+    font-size: 11px;
+    cursor: pointer;
+    background: var(--panel);
+    transition: all 0.15s ease;
+    font-family: var(--font);
+}
+
+.ai-sugg:hover {
+    background: var(--g1);
+    border-color: var(--g1);
+    color: #fff;
+}
+
+/* تأثيرات حركية (Animations) */
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes msgPop {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 
 /* Tools Panel (replaces feature info) */
 .tp-section{margin-bottom:12px}
@@ -441,11 +619,11 @@ nav.hnav::-webkit-scrollbar{display:none}
 .fr input,.fr select,.fr textarea{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--panel2);font-family:var(--font);outline:none;color:var(--text);font-size:12px}
 .fr input:focus,.fr select:focus{border-color:var(--border2)}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.btn{padding:7px 13px;border-radius:9px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:5px;cursor:pointer;border:none;font-family:var(--font);transition:all .15s}
-.bp{background:var(--grad);color:#fff;box-shadow:0 3px 10px rgba(54,179,106,.25)}
-.bp:hover{filter:brightness(1.08)}
+.btn{padding:7px 13px;border-radius:10px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:5px;cursor:pointer;border:none;font-family:var(--font);transition:all .15s;box-shadow:0 2px 8px rgba(18,40,34,.05)}
+.bp{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(54,179,106,.22)}
+.bp:hover{filter:brightness(1.06);transform:translateY(-1px)}
 .bg{background:var(--panel2);color:var(--text2);border:1px solid var(--border)}
-.bg:hover{background:var(--g5);color:var(--g1)}
+.bg:hover{background:var(--g5);color:var(--g1);border-color:var(--border2);transform:translateY(-1px)}
 .uz{border:2px dashed var(--border2);border-radius:10px;padding:20px;text-align:center;background:var(--panel2);cursor:pointer;transition:all .18s}
 .uz:hover{background:var(--g5);border-color:var(--g1)}
 .so,.co{display:flex;align-items:center;gap:8px;padding:9px;border:2px solid var(--border);border-radius:10px;background:var(--panel2);cursor:pointer;margin-bottom:6px;transition:all .18s}
@@ -550,6 +728,330 @@ nav.hnav::-webkit-scrollbar{display:none}
 .attr-pager button{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:5px;padding:3px 7px;cursor:pointer}
 .attr-pager button:disabled{opacity:.4;cursor:not-allowed}
 .attr-pager .pg-info{min-width:90px;text-align:center;color:var(--text3)}
+
+/* ═══════════════════════════════════════════
+   FULL VISUAL POLISH — GeoVerse UI
+═══════════════════════════════════════════ */
+:root {
+  --shadow-soft: 0 10px 28px rgba(18, 40, 34, 0.08);
+  --shadow-card: 0 14px 34px rgba(17, 36, 29, 0.12);
+  --shadow-btn: 0 8px 18px rgba(29, 107, 99, 0.16);
+  --surface: rgba(255,255,255,0.8);
+  --surface-strong: rgba(255,255,255,0.96);
+  --surface-alt: rgba(240,247,245,0.9);
+  --ring: rgba(54, 179, 106, 0.2);
+}
+
+html, body {
+  background:
+    radial-gradient(circle at top left, rgba(101, 195, 160, 0.12), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(24, 88, 79, 0.08), transparent 24%),
+    var(--bg);
+}
+
+body {
+  letter-spacing: 0.01em;
+}
+
+#hdr {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 68px;
+  padding: 10px 16px;
+  border: 1px solid rgba(120, 184, 174, 0.42);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(247,250,249,0.82));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 14px 30px rgba(18,40,34,0.08), inset 0 1px 0 rgba(255,255,255,0.72);
+}
+
+.logo-w {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(224,244,241,0.96), rgba(255,255,255,0.80));
+  border: 1px solid rgba(120,184,174,0.18);
+  box-shadow: inset 0 0 0 1px rgba(120,184,174,0.12), 0 8px 18px rgba(29,107,99,0.07);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.logo-w:hover {
+  transform: translateY(-1px);
+  border-color: rgba(120,184,174,0.50);
+}
+
+.logo-name {
+  letter-spacing: 0.02em;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--g1);
+}
+
+nav.hnav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1 1 auto;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 6px;
+}
+
+.nb {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  color: var(--text2);
+  font-weight: 700;
+  transition: all .2s ease;
+}
+
+.nb:hover, .nb.act {
+  background: linear-gradient(135deg, rgba(224,244,241,0.95), rgba(255,255,255,0.82));
+  border-color: rgba(120,184,174,0.65);
+  color: var(--g1);
+  box-shadow: 0 8px 18px rgba(29,107,99,0.08);
+}
+
+.srch-box {
+  width: min(250px, 32vw);
+  background: rgba(245,250,248,0.92);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 2px rgba(17, 36, 29, 0.03);
+  border-radius: 12px;
+}
+
+.srch-box input {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.h-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+#sb, #tp {
+  background: rgba(255,255,255,0.76);
+  border: 1px solid rgba(120, 184, 174, 0.22);
+  box-shadow: 0 14px 28px rgba(18,40,34,0.06);
+}
+
+.sbtabs, .tp-header, .tp-footer {
+  background: linear-gradient(180deg, rgba(245,250,248,0.98), rgba(255,255,255,0.84));
+}
+
+.stab {
+  border-radius: 0;
+  min-height: 42px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.stab.act {
+  background: linear-gradient(180deg, rgba(224,244,241,0.94), rgba(255,255,255,0.82));
+  box-shadow: inset 0 -2px 0 0 var(--g1);
+}
+
+.sbb, .tp-body {
+  background: rgba(245,250,248,0.25);
+}
+
+.mode-toggle {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 16px rgba(18,40,34,0.04);
+}
+
+.mode-btn {
+  padding: 7px 10px;
+  border-radius: 0;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: var(--text2);
+}
+
+.mode-btn.act {
+  box-shadow: inset 0 -2px 0 rgba(255,255,255,0.2);
+  color: var(--g1);
+}
+
+.btn {
+  min-height: 34px;
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow-btn);
+}
+
+.btn:hover {
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+
+.bp {
+  background: linear-gradient(135deg, var(--g2), var(--g1));
+}
+
+.bg {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), var(--panel2));
+  border: 1px solid var(--border);
+}
+
+.fr {
+  background: rgba(255,255,255,0.64);
+  border: 1px solid rgba(200,221,216,0.9);
+  padding: 8px 9px;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.fr label {
+  color: var(--text2);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.fr input,
+.fr select,
+.fr textarea {
+  border-radius: 9px !important;
+  border: 1px solid var(--border) !important;
+  background: rgba(245,250,248,0.9) !important;
+  box-shadow: inset 0 1px 2px rgba(17,36,29,0.03);
+}
+
+.fr input:focus,
+.fr select:focus,
+.fr textarea:focus {
+  border-color: var(--border2) !important;
+  box-shadow: 0 0 0 3px rgba(54,179,106,0.12);
+}
+
+.bmc {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(240,247,245,0.82));
+  box-shadow: 0 8px 18px rgba(18,40,34,0.045);
+}
+
+.bmc.act {
+  border-color: var(--g1);
+  box-shadow: 0 0 0 3px rgba(54,179,106,0.12), 0 12px 24px rgba(29,107,99,0.08);
+}
+
+.pm-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(240,247,245,0.82));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(18,40,34,0.04);
+}
+
+.acct-mini {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(240,247,245,0.9));
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 16px rgba(18,40,34,0.04);
+}
+
+#app {
+  background: linear-gradient(180deg, rgba(240,247,245,0.08), rgba(240,247,245,0.02));
+}
+
+#m2d {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+}
+
+.leaflet-control-zoom a,
+.leaflet-control-layers,
+.leaflet-control-attribution,
+.leaflet-control-scale {
+  border-radius: 10px !important;
+  box-shadow: 0 10px 22px rgba(17,36,29,0.07) !important;
+}
+
+@media (max-width: 980px) {
+  :root {
+    --hh: 110px;
+  }
+
+  #hdr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 10px 10px;
+  }
+
+  .logo-sub, .logo-ver { display: none; }
+  .h-search { display: none; }
+  .h-actions { justify-content: flex-end; flex-wrap: wrap; }
+  nav.hnav { flex-wrap: wrap; padding-bottom: 2px; }
+  #app { top: var(--hh); }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --hh: 92px;
+    --sbw: 190px;
+    --tpw: 170px;
+  }
+
+  #hdr {
+    padding: 7px 8px 8px;
+    gap: 6px;
+  }
+
+  .logo-name { font-size: 13px; }
+  .logo-img { width: 30px; height: 30px; }
+  .nb { padding: 6px 7px; font-size: 10px; }
+  .hdr-btn { width: 30px; height: 30px; }
+  .h-actions { gap: 5px; }
+  .h-actions .hdr-btn:nth-child(n+8) { display: none; }
+
+  #app {
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  #sb, #tp {
+    min-width: 0;
+    width: var(--sbw);
+    max-width: var(--sbw);
+  }
+
+  #tp { width: var(--tpw); }
+
+  .tp-header, .tp-body, .tp-footer, .sbb { padding-inline: 8px; }
+  .sbtabs { gap: 0; }
+  .stab { min-height: 38px; }
+  .btn { padding: 7px 10px; }
+}
+
+@media (max-width: 560px) {
+  :root { --sbw: 155px; --tpw: 148px; }
+
+  .h-actions .hdr-btn:nth-child(n+6) { display: none; }
+  .hdr-tools-group { gap: 5px; padding: 0 6px; }
+  .logo-w { padding: 0 6px; }
+  .nb i { display: none; }
+  .nb { padding: 6px; }
+  #sb, #tp { width: var(--sbw); }
+  #tp { width: var(--tpw); }
+  .stab { font-size: 9px; }
+}
 </style>
 <style id="geopy-tab-isolation">
     /* Tab visibility is controlled centrally by switchLeftTab(). */
@@ -589,8 +1091,8 @@ nav.hnav::-webkit-scrollbar{display:none}
 .hdr-btn {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    background: var(--panel2);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,.95), var(--panel2));
     border: 1px solid var(--border);
     color: var(--text2);
     cursor: pointer;
@@ -598,13 +1100,16 @@ nav.hnav::-webkit-scrollbar{display:none}
     align-items: center;
     justify-content: center;
     font-size: 14px;
-    transition: all 0.2s;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease, color .18s ease;
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(18,40,34,.04);
 }
 .hdr-btn:hover, .hdr-btn.on {
-    background: var(--g5);
+    background: linear-gradient(180deg, var(--g5), rgba(255,255,255,.9));
     color: var(--g1);
     border-color: var(--border2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(29,107,99,.14);
 }
 </style>
 
@@ -663,7 +1168,7 @@ nav.hnav::-webkit-scrollbar{display:none}
 </nav>
 <div class="h-search"></div>
 <div class="h-actions" style="display: flex; align-items: center; gap: 8px;">
-    <button class="hdr-btn on" id="ai-btn" title="Geo AI Master"><i class="fa-solid fa-robot"></i></button>
+    <button class="hdr-btn on" id="ai-btn" onclick="toggleAI()" title="Geo AI Master"><i class="fa-solid fa-robot"></i></button>
     <button class="hdr-btn" onclick="switchRightTab('style')" title="السيمبولوجي"><i class="fa-solid fa-brush"></i></button>
     <button class="hdr-btn" onclick="switchRightTab('dashboard')" title="Dashboard"><i class="fa-solid fa-chart-column"></i></button>
     <button class="hdr-btn" onclick="cycleTheme()" title="تبديل الثيم"><i class="fa-solid fa-palette"></i></button>
@@ -855,7 +1360,8 @@ def run_tool():
 <div id="m3d"><div id="cesiumContainer"></div><div class="gv3d-mini"><button class="btn bg" onclick="gv3dLoadActive()"><i class="fa-solid fa-layer-group"></i> الطبقة</button><button class="btn bg" onclick="gv3dLoadBuildings()"><i class="fa-solid fa-building"></i> المباني</button><button class="btn bg" onclick="gv3dZoomActive()"><i class="fa-solid fa-location-crosshairs"></i> Zoom</button><button class="btn bg" onclick="gv3dHome()"><i class="fa-solid fa-globe"></i> الأرض</button><button class="btn bg" onclick="gv3dClear()"><i class="fa-solid fa-eraser"></i> مسح</button><button class="btn bp" onclick="setView('2d')"><i class="fa-solid fa-map"></i> 2D</button></div><div id="gv3d-msg" class="gv3d-msg">جارٍ تجهيز الكرة الأرضية…</div></div>
 <!-- GEO AI PANEL -->
 <div class="float-panel show" id="ai-panel" style="display: none;">
-<div style="background: rgb(26, 58, 58); color: rgb(255, 255, 255); padding: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;"><span><i class="fa-solid fa-user-gear"></i> GeoAI Master (GIS Engineer)</span><button onclick="document.getElementById('ai-panel').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer;">×</button></div>
+<div style="background: rgb(26, 58, 58); color: rgb(255, 255, 255); padding: 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; gap: 8px;"><span><i class="fa-solid fa-user-gear"></i> GeoAI Master (GIS Engineer)</span><div style="display:flex; align-items:center; gap:6px;"><button onclick="resetAIChat()" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; border-radius:8px; padding:4px 8px; cursor:pointer; font-size:11px;">محادثة جديدة</button><button onclick="const p=document.getElementById('ai-panel'); if(p){p.classList.remove('show');p.style.display='none';} const b=document.getElementById('ai-btn'); if(b){b.classList.remove('on');}" style="background:none; border:none; color:#fff; cursor:pointer;">×</button></div></div>
+<div id="ai-status" style="padding:10px 14px 0; font-size:11px; color:#2d5a54; background:#e8f4f4; border-top:1px solid rgba(120,184,174,0.25);">النموذج المحلي: جاهز</div>
 <div id="ai-chat-history" style='height: 300px; overflow-y: auto; padding: 15px; background: rgb(253, 253, 253); font-size: 13px; color: rgb(51, 51, 51); line-height: 1.5; font-family: "Segoe UI", Tahoma, sans-serif;'><div style="color:#1a3a3a; background:#e8f4f4; padding:10px; border-radius:8px; border-left:4px solid #1a3a3a; margin-bottom:15px;">
 <strong>نظام المهندس الجغرافي الخبير v4.0</strong><br/>
         أهلاً بك يا زميلي المهندس. أنا هنا لتنفيذ كافة العمليات المكانية والتحليلية. كيف أساعدك في هندسة هذا المشروع؟
@@ -3623,31 +4129,110 @@ function setPickMode(){closeM('m-feat');pickMode=true;map.getContainer().style.c
 /* ═══════════════════════════════════════════════════════════════
    GEO AI
 ═══════════════════════════════════════════════════════════════ */
-function toggleAI(){
+function ensureAIInput(){
   const p=document.getElementById('ai-panel');
-  p.classList.toggle('show');
-  document.getElementById('ai-btn').classList.toggle('on',p.classList.contains('show'));
+  if(!p || p.querySelector('#ai-input')) return;
+  const wrap=document.createElement('div');
+  wrap.className='ai-input';
+  wrap.innerHTML='<input id="ai-input" type="text" placeholder="اكتب طلبك أو السؤال..." /><button type="button" onclick="sendAI()">إرسال</button>';
+  p.appendChild(wrap);
 }
 
-function sendAI(){
+const AI_BACKEND_URL='http://localhost:8001/api/chat';
+const AI_DEFAULT_MODEL='llama3.1';
+let aiBusy=false;
+
+function setAIStatus(msg){
+  const el=document.getElementById('ai-status');
+  if(el) el.textContent=msg;
+}
+
+function resetAIChat(){
+  const chat=document.getElementById('ai-chat-history');
+  if(!chat) return;
+  chat.innerHTML='';
+  const intro=document.createElement('div');
+  intro.style.cssText='color:#1a3a3a; background:#e8f4f4; padding:10px; border-radius:8px; border-left:4px solid #1a3a3a; margin-bottom:15px;';
+  intro.innerHTML='<strong>محادثة جديدة</strong><br/>أنا جاهز لمساعدتك في الخريطة والطبقات والتحليل الجغرافي.';
+  chat.appendChild(intro);
+  setAIStatus('محادثة جديدة - نموذج محلي جاهز');
+}
+
+async function callRealAI(prompt){
+  try {
+    const res=await fetch(AI_BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      model:AI_DEFAULT_MODEL,
+      messages:[
+        {role:'system',content:'أنت مساعد GIS و GeoAI عربي. أجب باختصار وبدقة، وركز على المهام الجغرافية والخرائط والطبقات والبيانات المكانية.'},
+        {role:'user',content:prompt}
+      ],
+      temperature:0.4,
+      max_tokens:400
+    })});
+    const data=await res.json();
+    if(!res.ok){ throw new Error(data?.error || 'فشل الاتصال بالنموذج الحقيقي'); }
+    const text=data?.content || data?.reply || data?.message || '';
+    return String(text || '').trim();
+  }catch(err){
+    console.warn('AI backend unavailable:', err);
+    return null;
+  }
+}
+
+function toggleAI(){
+  const p=document.getElementById('ai-panel');
+  if(!p) return;
+  const show=!p.classList.contains('show');
+  p.classList.toggle('show', show);
+  p.style.display = show ? 'flex' : 'none';
+  const btn=document.getElementById('ai-btn');
+  if(btn) btn.classList.toggle('on', show);
+  if(show){
+    ensureAIInput();
+    const inp=document.getElementById('ai-input');
+    if(inp) setTimeout(()=>inp.focus(), 80);
+  }
+}
+
+async function sendAI(){
+  ensureAIInput();
   const inp=document.getElementById('ai-input');
-  const q=inp.value.trim();if(!q)return;
+  if(!inp||aiBusy)return;
+  const q=inp.value.trim();
+  if(!q)return;
   inp.value='';
+  aiBusy=true;
   addAIMsg(q,'user');
-  const reply=generateAIReply(q);
-  setTimeout(()=>addAIMsg(reply,'ai'),400);
+  setAIStatus('جارٍ الاتصال بالنموذج الحقيقي...');
+  const reply=await callRealAI(q);
+  if(reply){
+    addAIMsg(reply,'ai');
+    setAIStatus('النموذج الحقيقي متصل ويعمل');
+  }else{
+    const fallback=generateAIReply(q);
+    addAIMsg(fallback,'ai');
+    setAIStatus('النموذج الحقيقي غير متاح — تم استخدام الرد المحلي');
+  }
+  aiBusy=false;
 }
 
 function aiQuery(q){addAIMsg(q,'user');setTimeout(()=>addAIMsg(generateAIReply(q),'ai'),400);}
 
 function addAIMsg(text,type){
-  const body=document.getElementById('ai-body');
+  const body=document.getElementById('ai-chat-history') || document.getElementById('ai-body');
+  if(!body){ return; }
   const div=document.createElement('div');
   div.className='ai-msg '+type;
   div.textContent=text;
   body.appendChild(div);
   body.scrollTop=body.scrollHeight;
 }
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && document.activeElement && document.activeElement.id === 'ai-input'){
+    sendAI();
+  }
+});
 
 function generateAIReply(q){
   const tq=q.toLowerCase();
@@ -3970,10 +4555,15 @@ function switchRightTab(tab){
 }
 
 function setView(m){
-  document.getElementById('vb2d').classList.toggle('act',m==='2d');
-  document.getElementById('vb3d').classList.toggle('act',m==='3d');
-  document.getElementById('m2d').style.display=m==='2d'?'block':'none';
-  document.getElementById('m3d').style.display=m==='3d'?'flex':'none';
+  const vb2d = document.getElementById('vb2d');
+  const vb3d = document.getElementById('vb3d');
+  const m2d = document.getElementById('m2d');
+  const m3d = document.getElementById('m3d');
+
+  if (vb2d) vb2d.classList.toggle('act',m==='2d');
+  if (vb3d) vb3d.classList.toggle('act',m==='3d');
+  if (m2d) m2d.style.display=m==='2d'?'block':'none';
+  if (m3d) m3d.style.display=m==='3d'?'flex':'none';
 }
 
 function locMe(){navigator.geolocation.getCurrentPosition(p=>map.setView([p.coords.latitude,p.coords.longitude],14),()=>showT('⚠️ تعذر الوصول للموقع'));}
@@ -4034,14 +4624,22 @@ function showT(msg){const t=document.getElementById('toast');t.textContent=msg;t
    INIT
 ═══════════════════════════════════════════════════════════════ */
 const LD_MSGS=['تهيئة النظام...','تحميل واجهة الخريطة...','تحميل مكتبات التحليل...','جاهز!'];
-let ldIdx=0;const ldInterval=setInterval(()=>{if(ldIdx<LD_MSGS.length)document.getElementById('ld-status').textContent=LD_MSGS[ldIdx++];else clearInterval(ldInterval);},450);
+let ldIdx=0;
+const ldStatus=document.getElementById('ld-status');
+const ldInterval=setInterval(()=>{
+  if(!ldStatus) return clearInterval(ldInterval);
+  if(ldIdx<LD_MSGS.length) ldStatus.textContent=LD_MSGS[ldIdx++];
+  else clearInterval(ldInterval);
+},450);
 
 setTimeout(()=>{
   updateAllUI();
   switchRightTab('tools');
   const ld=document.getElementById('loading');
-  ld.style.opacity='0';
-  setTimeout(()=>ld.remove(),600);
+  if(ld){
+    ld.style.opacity='0';
+    setTimeout(()=>ld.remove(),600);
+  }
   showT('✓ GeoVerse v1.0 — مرحباً بك!');
 },2000);
 
@@ -4115,8 +4713,10 @@ function enableCinematicMode() {
   setupBoundingBoxSelection();
   createCinematicSettingsPanel();
 
-  document.getElementById('cinematic-start').style.display = 'none';
-  document.getElementById('cinematic-stop').style.display = 'inline-block';
+  const cinematicStartBtn = document.getElementById('cinematic-start');
+  const cinematicStopBtn = document.getElementById('cinematic-stop');
+  if(cinematicStartBtn) cinematicStartBtn.style.display = 'none';
+  if(cinematicStopBtn) cinematicStopBtn.style.display = 'inline-block';
 }
 
 function showCinematicInstructions() {
@@ -4483,8 +5083,10 @@ function resetCinematicMode() {
   cinematicMode = 'setup';
   cinematicBoundingBox = null;
   removeCinematicInstructions();
-  document.getElementById('cinematic-start').style.display = 'inline-block';
-  document.getElementById('cinematic-stop').style.display = 'none';
+  const cinematicStartBtn = document.getElementById('cinematic-start');
+  const cinematicStopBtn = document.getElementById('cinematic-stop');
+  if(cinematicStartBtn) cinematicStartBtn.style.display = 'inline-block';
+  if(cinematicStopBtn) cinematicStopBtn.style.display = 'none';
 }
 
 function startCinematic() {
